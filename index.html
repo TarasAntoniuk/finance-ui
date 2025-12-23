@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Finance Accounting System</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+<div class="app-container">
+    <!-- Sidebar Navigation -->
+    <aside class="sidebar">
+        <div class="logo">
+            <h1>Finance</h1>
+            <p>Accounting System</p>
+        </div>
+
+        <nav class="nav-menu">
+            <!-- General Classifiers Group -->
+            <div class="nav-group">
+                <button class="nav-group-header" data-group="general-classifiers">
+                    <span class="group-icon">📋</span>
+                    <span class="group-title">General Classifiers</span>
+                    <span class="group-arrow">▼</span>
+                </button>
+                <div class="nav-group-items" data-group-content="general-classifiers">
+                    <button class="nav-item" data-module="organizations">
+                        <span class="icon">🏢</span>
+                        Organizations
+                    </button>
+                    <button class="nav-item" data-module="counterparties">
+                        <span class="icon">🤝</span>
+                        Counterparties
+                    </button>
+                    <button class="nav-item" data-module="countries">
+                        <span class="icon">🌍</span>
+                        Countries
+                    </button>
+
+                    <!-- Currency Subgroup -->
+                    <div class="nav-subgroup">
+                        <button class="nav-subgroup-header" data-subgroup="currencies">
+                            <span class="subgroup-icon">💱</span>
+                            <span class="subgroup-title">Currencies</span>
+                            <span class="subgroup-arrow">▼</span>
+                        </button>
+                        <div class="nav-subgroup-items" data-subgroup-content="currencies">
+                            <button class="nav-item" data-module="currencies">
+                                <span class="icon">💰</span>
+                                Currencies
+                            </button>
+                            <button class="nav-item" data-module="exchange-rates">
+                                <span class="icon">📈</span>
+                                Exchange Rates
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Banking Group -->
+            <div class="nav-group">
+                <button class="nav-group-header" data-group="banking">
+                    <span class="group-icon">🏦</span>
+                    <span class="group-title">Banking</span>
+                    <span class="group-arrow">▼</span>
+                </button>
+                <div class="nav-group-items" data-group-content="banking">
+                    <button class="nav-item" data-module="banks">
+                        <span class="icon">🏛️</span>
+                        Banks
+                    </button>
+                    <button class="nav-item" data-module="bank-accounts">
+                        <span class="icon">💼</span>
+                        Bank Accounts
+                    </button>
+
+                    <!-- Banking Documents Subgroup -->
+                    <div class="nav-subgroup">
+                        <button class="nav-subgroup-header" data-subgroup="banking-documents">
+                            <span class="subgroup-icon">📄</span>
+                            <span class="subgroup-title">Banking Documents</span>
+                            <span class="subgroup-arrow">▼</span>
+                        </button>
+                        <div class="nav-subgroup-items" data-subgroup-content="banking-documents">
+                            <button class="nav-item" data-module="bank-payments">
+                                <span class="icon">💸</span>
+                                Bank Payments
+                            </button>
+                            <button class="nav-item" data-module="bank-receipts">
+                                <span class="icon">💵</span>
+                                Bank Receipts
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Banking Reports Subgroup -->
+                    <div class="nav-subgroup">
+                        <button class="nav-subgroup-header" data-subgroup="banking-reports">
+                            <span class="subgroup-icon">📊</span>
+                            <span class="subgroup-title">Banking Reports</span>
+                            <span class="subgroup-arrow">▼</span>
+                        </button>
+                        <div class="nav-subgroup-items" data-subgroup-content="banking-reports">
+                            <button class="nav-item" data-module="account-balances">
+                                <span class="icon">💰</span>
+                                Account Balances
+                            </button>
+                            <button class="nav-item" data-module="account-turnovers">
+                                <span class="icon">🔄</span>
+                                Account Turnovers
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Configuration Group -->
+            <div class="nav-group">
+                <button class="nav-group-header" data-group="configuration">
+                    <span class="group-icon">⚙️</span>
+                    <span class="group-title">Configuration</span>
+                    <span class="group-arrow">▼</span>
+                </button>
+                <div class="nav-group-items" data-group-content="configuration">
+                    <button class="nav-item" data-module="accounting-policies">
+                        <span class="icon">📊</span>
+                        Accounting Policies
+                    </button>
+                </div>
+            </div>
+        </nav>
+    </aside>
+
+    <!-- Main Content Area -->
+    <main class="main-content">
+        <header class="content-header">
+            <h2 id="module-title">Dashboard</h2>
+            <div class="header-actions">
+                <button class="btn-icon" id="refresh-btn" title="Refresh">
+                    <span>🔄</span>
+                </button>
+                <div class="api-status">
+                    <span class="status-dot" id="api-status-dot"></span>
+                    <span id="api-status-text">Connecting...</span>
+                </div>
+            </div>
+        </header>
+
+        <div class="content-body" id="content-body">
+            <!-- Dynamic content will be loaded here -->
+            <div class="welcome-screen">
+                <h2>Welcome to Finance Accounting System</h2>
+                <p>Select a module from the left menu to get started</p>
+                <div class="quick-stats" id="quick-stats">
+                    <div class="stat-card">
+                        <h4>Bank Accounts</h4>
+                        <p class="stat-value" id="accounts-count">-</p>
+                    </div>
+                    <div class="stat-card">
+                        <h4>Counterparties</h4>
+                        <p class="stat-value" id="counterparties-count">-</p>
+                    </div>
+                    <div class="stat-card">
+                        <h4>Organizations</h4>
+                        <p class="stat-value" id="organizations-count">-</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+</div>
+
+<!-- Modal Template -->
+<div class="modal" id="modal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h3 id="modal-title">Modal</h3>
+            <button class="modal-close" id="modal-close">&times;</button>
+        </div>
+        <div class="modal-body" id="modal-body">
+            <!-- Dynamic modal content -->
+        </div>
+    </div>
+</div>
+
+<!-- Toast Notifications -->
+<div class="toast-container" id="toast-container"></div>
+
+<script src="api.js"></script>
+<script src="app.js"></script>
+<script src="forms.js"></script>
+</body>
+</html>
