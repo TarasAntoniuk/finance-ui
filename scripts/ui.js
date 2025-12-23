@@ -607,6 +607,268 @@ const modules = {
                 Наступна ▶
             </button>
         `;
+    },
+
+    // Banking Reports
+    async 'account-balances'() {
+        document.getElementById('module-title').textContent = 'Account Balances';
+        const contentBody = document.getElementById('content-body');
+
+        // Get current date as default
+        const today = new Date().toISOString().split('T')[0];
+
+        contentBody.innerHTML = `
+            <div class="action-bar">
+                <div class="action-bar-left">
+                    <h3>Account Balance Report</h3>
+                </div>
+                <div class="action-bar-right">
+                    <input type="date" id="as-of-date" value="${today}">
+                    <select id="org-filter">
+                        <option value="">All Organizations</option>
+                    </select>
+                    <select id="currency-filter">
+                        <option value="">All Currencies</option>
+                    </select>
+                    <button class="btn btn-primary" onclick="modules['account-balances']()">
+                        🔍 Generate Report
+                    </button>
+                </div>
+            </div>
+            <div id="report-content">
+                <div class="text-center">
+                    <p>Select filters and click "Generate Report"</p>
+                </div>
+            </div>
+        `;
+
+        try {
+            // Load filter options
+            const [organizations, currencies] = await Promise.all([
+                api.getOrganizations(),
+                api.getCurrencies()
+            ]);
+
+            const orgFilter = document.getElementById('org-filter');
+            organizations.forEach(org => {
+                const option = document.createElement('option');
+                option.value = org.id;
+                option.textContent = org.name;
+                orgFilter.appendChild(option);
+            });
+
+            const currFilter = document.getElementById('currency-filter');
+            currencies.forEach(curr => {
+                const option = document.createElement('option');
+                option.value = curr.id;
+                option.textContent = `${curr.code} - ${curr.name}`;
+                currFilter.appendChild(option);
+            });
+
+            // Load report data
+            const asOfDate = document.getElementById('as-of-date').value;
+            const orgId = document.getElementById('org-filter').value || null;
+            const currId = document.getElementById('currency-filter').value || null;
+
+            const report = await api.getAccountBalances(asOfDate, orgId, currId);
+
+            const reportContent = document.getElementById('report-content');
+            reportContent.innerHTML = `
+                <div class="report-header">
+                    <p><strong>Report Date:</strong> ${utils.formatDate(report.reportDate)}</p>
+                    <p><strong>Generated:</strong> ${utils.formatDateTime(report.generatedAt)}</p>
+                    <p><strong>Total Accounts:</strong> ${report.totalAccounts}</p>
+                </div>
+
+                <div class="table-container">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Organization</th>
+                                <th>Account Number</th>
+                                <th>Bank</th>
+                                <th>Currency</th>
+                                <th class="text-right">Balance</th>
+                                <th>Last Transaction</th>
+                                <th>Status</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            ${report.accounts.map(acc => `
+                                <tr>
+                                    <td>${acc.organizationName}</td>
+                                    <td>${acc.accountNumber}</td>
+                                    <td>${acc.bankName} (${acc.bankSwiftCode})</td>
+                                    <td>${acc.currencyCode}</td>
+                                    <td class="text-right"><strong>${utils.formatCurrency(acc.balance, acc.currencySymbol)}</strong></td>
+                                    <td>${acc.lastTransactionDate ? utils.formatDate(acc.lastTransactionDate) : '-'}</td>
+                                    <td><span class="badge badge-${acc.status.toLowerCase()}">${modules.translateAccountStatus(acc.status)}</span></td>
+                                </tr>
+                            `).join('')}
+                        </tbody>
+                    </table>
+                </div>
+
+                ${Object.keys(report.grandTotalByCurrency).length > 0 ? `
+                    <div class="report-summary">
+                        <h4>Grand Totals by Currency</h4>
+                        <div class="quick-stats">
+                            ${Object.entries(report.grandTotalByCurrency).map(([currency, total]) => `
+                                <div class="stat-card">
+                                    <h4>${currency}</h4>
+                                    <p class="stat-value">${utils.formatNumber(total, 2)}</p>
+                                </div>
+                            `).join('')}
+                        </div>
+                    </div>
+                ` : ''}
+            `;
+        } catch (error) {
+            utils.showToast('Error loading report: ' + error.message, 'error');
+        }
+    },
+
+    async 'account-turnovers'() {
+        document.getElementById('module-title').textContent = 'Account Turnovers';
+        const contentBody = document.getElementById('content-body');
+
+        // Get current quarter dates
+        const now = new Date();
+        const quarter = Math.floor(now.getMonth() / 3);
+        const startDate = new Date(now.getFullYear(), quarter * 3, 1).toISOString().split('T')[0];
+        const endDate = new Date(now.getFullYear(), quarter * 3 + 3, 0).toISOString().split('T')[0];
+
+        contentBody.innerHTML = `
+            <div class="action-bar">
+                <div class="action-bar-left">
+                    <h3>Account Turnover Report</h3>
+                </div>
+                <div class="action-bar-right">
+                    <input type="date" id="start-date" value="${startDate}">
+                    <input type="date" id="end-date" value="${endDate}">
+                    <select id="org-filter-turnover">
+                        <option value="">All Organizations</option>
+                    </select>
+                    <select id="account-filter">
+                        <option value="">All Accounts</option>
+                    </select>
+                    <select id="currency-filter-turnover">
+                        <option value="">All Currencies</option>
+                    </select>
+                    <button class="btn btn-primary" onclick="modules['account-turnovers']()">
+                        🔍 Generate Report
+                    </button>
+                </div>
+            </div>
+            <div id="report-content-turnover">
+                <div class="text-center">
+                    <p>Select period and filters, then click "Generate Report"</p>
+                </div>
+            </div>
+        `;
+
+        try {
+            // Load filter options
+            const [organizations, accounts, currencies] = await Promise.all([
+                api.getOrganizations(),
+                api.getBankAccounts(),
+                api.getCurrencies()
+            ]);
+
+            const orgFilter = document.getElementById('org-filter-turnover');
+            organizations.forEach(org => {
+                const option = document.createElement('option');
+                option.value = org.id;
+                option.textContent = org.name;
+                orgFilter.appendChild(option);
+            });
+
+            const accFilter = document.getElementById('account-filter');
+            accounts.forEach(acc => {
+                const option = document.createElement('option');
+                option.value = acc.id;
+                option.textContent = `${acc.accountNumber} (${acc.bankName})`;
+                accFilter.appendChild(option);
+            });
+
+            const currFilter = document.getElementById('currency-filter-turnover');
+            currencies.forEach(curr => {
+                const option = document.createElement('option');
+                option.value = curr.id;
+                option.textContent = `${curr.code} - ${curr.name}`;
+                currFilter.appendChild(option);
+            });
+
+            // Load report data
+            const start = document.getElementById('start-date').value;
+            const end = document.getElementById('end-date').value;
+            const orgId = document.getElementById('org-filter-turnover').value || null;
+            const accId = document.getElementById('account-filter').value || null;
+            const currId = document.getElementById('currency-filter-turnover').value || null;
+
+            const report = await api.getAccountTurnovers(start, end, orgId, accId, currId);
+
+            const reportContent = document.getElementById('report-content-turnover');
+            reportContent.innerHTML = `
+                <div class="report-header">
+                    <p><strong>Period:</strong> ${utils.formatDate(report.period.startDate)} - ${utils.formatDate(report.period.endDate)}</p>
+                    <p><strong>Generated:</strong> ${utils.formatDateTime(report.generatedAt)}</p>
+                    <p><strong>Total Accounts:</strong> ${report.totalAccounts}</p>
+                </div>
+
+                <div class="table-container">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Organization</th>
+                                <th>Account Number</th>
+                                <th>Bank</th>
+                                <th>Currency</th>
+                                <th class="text-right">Opening Balance</th>
+                                <th class="text-right">Debit Turnover</th>
+                                <th class="text-right">Credit Turnover</th>
+                                <th class="text-right">Closing Balance</th>
+                                <th class="text-center">Transactions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            ${report.accounts.map(acc => `
+                                <tr>
+                                    <td>${acc.organizationName}</td>
+                                    <td>${acc.accountNumber}</td>
+                                    <td>${acc.bankName} (${acc.bankSwiftCode})</td>
+                                    <td>${acc.currencyCode}</td>
+                                    <td class="text-right">${utils.formatCurrency(acc.openingBalance, acc.currencySymbol)}</td>
+                                    <td class="text-right" style="color: var(--success-color);">${utils.formatCurrency(acc.debitTurnover, acc.currencySymbol)}</td>
+                                    <td class="text-right" style="color: var(--danger-color);">${utils.formatCurrency(acc.creditTurnover, acc.currencySymbol)}</td>
+                                    <td class="text-right"><strong>${utils.formatCurrency(acc.closingBalance, acc.currencySymbol)}</strong></td>
+                                    <td class="text-center">${acc.transactionCount}</td>
+                                </tr>
+                            `).join('')}
+                        </tbody>
+                    </table>
+                </div>
+
+                ${Object.keys(report.summaryByCurrency).length > 0 ? `
+                    <div class="report-summary">
+                        <h4>Summary Totals by Currency</h4>
+                        <div class="quick-stats">
+                            ${Object.entries(report.summaryByCurrency).map(([currency, summary]) => `
+                                <div class="stat-card">
+                                    <h4>${currency}</h4>
+                                    <p><small>Opening:</small> ${utils.formatNumber(summary.totalOpeningBalance, 2)}</p>
+                                    <p style="color: var(--success-color);"><small>Debit:</small> ${utils.formatNumber(summary.totalDebitTurnover, 2)}</p>
+                                    <p style="color: var(--danger-color);"><small>Credit:</small> ${utils.formatNumber(summary.totalCreditTurnover, 2)}</p>
+                                    <p class="stat-value">${utils.formatNumber(summary.totalClosingBalance, 2)}</p>
+                                </div>
+                            `).join('')}
+                        </div>
+                    </div>
+                ` : ''}
+            `;
+        } catch (error) {
+            utils.showToast('Error loading report: ' + error.message, 'error');
+        }
     }
 };
 

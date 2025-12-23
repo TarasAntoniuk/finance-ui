@@ -384,3 +384,33 @@ textarea {
     color: #ffffff;
     border-color: var(--primary-color);
 }
+
+
+/* ========================================
+   REPORTS
+   ======================================== */
+
+.report-header {
+    background: var(--bg-primary);
+    padding: var(--spacing-lg);
+    border-radius: var(--radius-md);
+    margin-bottom: var(--spacing-lg);
+}
+
+.report-header p {
+    margin: var(--spacing-xs) 0;
+    color: var(--text-primary);
+}
+
+.report-summary {
+    margin-top: var(--spacing-xl);
+    padding: var(--spacing-lg);
+    background: var(--bg-primary);
+    border-radius: var(--radius-md);
+}
+
+.report-summary h4 {
+    margin-bottom: var(--spacing-lg);
+    color: var(--text-primary);
+    font-size: 1.125rem;
+}
