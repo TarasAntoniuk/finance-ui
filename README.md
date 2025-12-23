@@ -1,224 +1,416 @@
-# Finance Accounting System - Web Interface
+# Finance Accounting System
 
-Web interface for a financial accounting system with support for banking operations, reference data, and reports.
+A modern, responsive web-based finance and accounting management system built with vanilla JavaScript, HTML5, and CSS3.
+
+## Overview
+
+Finance Accounting System is a comprehensive solution for managing financial operations including bank accounts, payments, receipts, counterparties, and detailed financial reporting. The system provides an intuitive interface for tracking transactions and generating financial reports.
 
 ## Features
 
-- ✅ Bank Payments (create, view, post, cancel)
-- ✅ Bank Receipts (create, view, post)
-- ✅ Bank Account Management
-- ✅ Reference Data: organizations, counterparties, banks, currencies, countries
-- ✅ Pagination and data filtering
-- ✅ Responsive design
-- ✅ Integration with production API (api.tarasantoniuk.com)
+### General Classifiers
+- ✅ **Organizations Management**: Create and manage multiple organizations
+- ✅ **Counterparties Management**: Track business partners and vendors with pagination
+- ✅ **Countries**: Maintain country directory with ISO codes
+- ✅ **Currencies**: Manage multiple currencies with exchange rate support
+- ✅ **Exchange Rates**: Real-time currency exchange rate management with ECB integration
+
+### Banking Operations
+- ✅ **Banks**: Manage bank directory with activate/deactivate functionality
+- ✅ **Bank Accounts**: Track multiple bank accounts across organizations
+- ✅ **Bank Payments**: Record and process outgoing payments with full CRUD operations
+- ✅ **Bank Receipts**: Manage incoming payments and receipts
+- ✅ **Document Status Management**: DRAFT → POSTED → CANCELLED workflow
+- ✅ **Edit Functionality**: Full edit support for payments and receipts
+- ✅ **Status Filtering**: Filter documents by status (DRAFT, POSTED)
+
+### Banking Reports
+- ✅ **Account Balances**: View current balances for all bank accounts
+- ✅ **Account Turnovers**: Analyze financial movements and transactions
+
+### Configuration
+- ✅ **Accounting Policies**: Configure accounting rules and policies
 
 ## Project Structure
 
 ```
 finance-ui/
-├── index.html          # Main page with navigation
-├── styles.css          # Application styles
-├── api.js              # API client for backend communication
-├── app.js              # Main application logic
-├── forms.js            # Forms for creation/editing
-└── README.md           # Documentation
+├── index.html                 # Main HTML file
+├── README.md                  # Project documentation
+│
+├── styles/                    # CSS stylesheets
+│   ├── style.css             # Base styles, variables, layout, sidebar
+│   ├── components.css        # UI components (buttons, forms, modals, etc.)
+│   └── responsive.css        # Responsive design and media queries
+│
+├── scripts/                   # JavaScript files
+│   ├── api.js                # API client and HTTP requests
+│   ├── utils.js              # Utility functions and helpers
+│   ├── ui.js                 # UI modules and form handlers
+│   └── app.js                # Main application and initialization
+│
+├── assets/                    # Static assets
+│   ├── images/               # Image files
+│   └── icons/                # Icon files
+│
+└── docs/                      # Documentation
+    └── api-doc.json          # OpenAPI specification
 ```
 
-## Quick Start
+## Tech Stack
 
-### Running Locally
+- **Frontend Framework**: Vanilla JavaScript (ES6+)
+- **Markup**: HTML5
+- **Styling**: CSS3 with CSS Variables
+- **Architecture**: Component-based modular design
+- **State Management**: Simple state object pattern
+- **API Communication**: Fetch API
+- **Storage**: LocalStorage for navigation state persistence
 
-1. Open `index.html` directly in your browser
-2. Or run a simple HTTP server:
+## Getting Started
 
+### Prerequisites
+
+- Modern web browser (Chrome, Firefox, Safari, Edge)
+- Web server (for local development)
+- Backend API server running
+
+### Installation
+
+1. Clone the repository:
+```bash
+git clone <repository-url>
+cd finance-ui
+```
+
+2. Set up a local web server. You can use any of the following:
+
+**Using Python:**
 ```bash
 # Python 3
 python -m http.server 8000
 
-# Node.js
-npx serve
+# Python 2
+python -m SimpleHTTPServer 8000
+```
 
-# PHP
+**Using Node.js:**
+```bash
+npx http-server -p 8000
+# or
+npx serve
+```
+
+**Using PHP:**
+```bash
 php -S localhost:8000
 ```
 
-3. Open http://localhost:8000 in your browser
-
-### Connecting to Local Backend
-
-If you need to connect to a local backend instead of production:
-
-1. Open `api.js`
-2. Change:
-```javascript
-const API_BASE_URL = 'https://api.tarasantoniuk.com';
-// const API_BASE_URL = 'http://localhost:8080';
+3. Open your browser and navigate to:
+```
+http://localhost:8000
 ```
 
-To:
+### Configuration
+
+Update the API base URL in `scripts/api.js`:
+
 ```javascript
-// const API_BASE_URL = 'https://api.tarasantoniuk.com';
+// For production
+const API_BASE_URL = 'https://api.tarasantoniuk.com';
+
+// For local development
 const API_BASE_URL = 'http://localhost:8080';
 ```
 
-## Functionality
-
-### Banking Modules
-
-**Bank Payments**
-- Create new payments
-- View payment details
-- Post documents (DRAFT → POSTED)
-- Cancel posting (POSTED → DRAFT)
-- Delete drafts
-- Filter by status
-- Pagination of results
-
-**Bank Receipts**
-- Similar functionality as payments
-- Different receipt types (from customers, loans, investments)
-
-**Bank Accounts**
-- View account list
-- Manage statuses (ACTIVE, INACTIVE, CLOSED)
-- Set default account
-
-**Banks**
-- CRUD operations
-- Activate/deactivate
-
-### Reference Data
-
-**Organizations**
-- Manage legal entities
-- Link to countries
-- Registration and tax numbers
-
-**Counterparties**
-- Customers, suppliers, or both types
-- Contact information
-- List pagination
-
-**Currencies**
-- ISO currency codes
-- Symbols and decimal places
-- Activate/deactivate
-
-**Countries**
-- ISO country codes
-- Phone codes
-- Currency mapping
-
-### Reports (In Development)
-
-- Account balances
-- Account turnovers
-- Payment and receipt analysis
-
 ## API Integration
 
-The application uses RESTful API with the following endpoints:
+### Backend API
 
-### Bank Payments
-```
-GET    /api/v1/bank-payments
-POST   /api/v1/bank-payments
-GET    /api/v1/bank-payments/{id}
-PUT    /api/v1/bank-payments/{id}
-DELETE /api/v1/bank-payments/{id}
-POST   /api/v1/bank-payments/{id}/post
-POST   /api/v1/bank-payments/{id}/unpost
-```
+The application integrates with a RESTful API backend:
+- **Production URL**: `https://api.tarasantoniuk.com`
+- **Local Development**: `http://localhost:8080`
+- **API Documentation**: https://api.tarasantoniuk.com/swagger-ui.html
 
-### Bank Receipts
-```
-GET    /api/v1/bank-receipts
-POST   /api/v1/bank-receipts
-GET    /api/v1/bank-receipts/{id}
-PUT    /api/v1/bank-receipts/{id}
-DELETE /api/v1/bank-receipts/{id}
-POST   /api/v1/bank-receipts/{id}/post
-POST   /api/v1/bank-receipts/{id}/unpost
-```
+### API Documentation
 
-### Reference Data
+Complete API documentation is available in `docs/api-doc.json` (OpenAPI 3.0 format).
+
+### Key API Endpoints
+
+#### Bank Payments
 ```
-GET    /api/organizations
-GET    /api/counterparties
-GET    /api/bank-accounts
-GET    /api/banks
-GET    /api/currencies
-GET    /api/countries
+GET    /api/v1/bank-payments              # Get all payments (paginated)
+GET    /api/v1/bank-payments/{id}         # Get payment by ID
+POST   /api/v1/bank-payments              # Create new payment
+PUT    /api/v1/bank-payments/{id}         # Update payment
+DELETE /api/v1/bank-payments/{id}         # Delete payment
+POST   /api/v1/bank-payments/{id}/post    # Post payment
+POST   /api/v1/bank-payments/{id}/unpost  # Unpost payment
+GET    /api/v1/bank-payments/status/{status}      # Get payments by status
+GET    /api/v1/bank-payments/date-range          # Get payments by date range
 ```
 
-## Technologies
+#### Bank Receipts
+```
+GET    /api/v1/bank-receipts              # Get all receipts (paginated)
+GET    /api/v1/bank-receipts/{id}         # Get receipt by ID
+POST   /api/v1/bank-receipts              # Create new receipt
+PUT    /api/v1/bank-receipts/{id}         # Update receipt
+DELETE /api/v1/bank-receipts/{id}         # Delete receipt
+POST   /api/v1/bank-receipts/{id}/post    # Post receipt
+POST   /api/v1/bank-receipts/{id}/unpost  # Unpost receipt
+GET    /api/v1/bank-receipts/status/{status}     # Get receipts by status
+GET    /api/v1/bank-receipts/date-range         # Get receipts by date range
+```
 
-- **Frontend**: Vanilla JavaScript (ES6+), HTML5, CSS3
-- **API**: REST API with JSON
-- **Styling**: Custom CSS with CSS variables
-- **Architecture**: Modular structure without frameworks
+#### Reference Data
+```
+GET    /api/organizations                 # Get all organizations
+GET    /api/counterparties               # Get all counterparties (paginated)
+GET    /api/bank-accounts                # Get all bank accounts
+GET    /api/banks                        # Get all banks
+GET    /api/currencies                   # Get all currencies
+GET    /api/countries                    # Get all countries
+GET    /api/exchange-rates               # Get exchange rates
+GET    /api/accounting-policies          # Get accounting policies
+```
+
+## Usage Guide
+
+### Navigation
+
+The application features a collapsible sidebar navigation organized into groups:
+
+- **General Classifiers**: Organizations, Counterparties, Countries, Currencies
+- **Banking**: Banks, Accounts, Documents (Payments/Receipts), Reports
+- **Configuration**: Accounting Policies
+
+Navigation states are persisted in localStorage for improved user experience.
+
+### Creating a Bank Payment
+
+1. Navigate to **Banking > Banking Documents > Bank Payments**
+2. Click **+ New Payment** button
+3. Fill in the form:
+   - Transaction Date & Time (required)
+   - Payment Type (required)
+   - Organization (required)
+   - Bank Account (required)
+   - Counterparty (required)
+   - Currency (required)
+   - Amount (required)
+   - Optional: Bank Commission, Payment Reference, Value Date, etc.
+4. Click **Create**
+
+### Creating a Bank Receipt
+
+1. Navigate to **Banking > Banking Documents > Bank Receipts**
+2. Click **+ New Receipt** button
+3. Fill in the form with required details
+4. Click **Create**
+
+### Editing Documents
+
+1. Open the document list
+2. Click the ✏️ (Edit) icon for a DRAFT document
+3. Modify the fields
+4. Click **Update**
+
+**Note**: Only DRAFT documents can be edited.
+
+### Posting/Unposting Documents
+
+Documents can be in different states:
+- **DRAFT**: Editable, can be deleted
+- **POSTED**: Finalized, creates accounting entries, cannot be edited
+- **CANCELLED**: Cancelled document
+
+**To post a document:**
+1. Open the document list
+2. Click the ✅ icon for a DRAFT document
+3. Confirm the action
+
+**To unpost a document:**
+1. Open the document list
+2. Click the ↩️ icon for a POSTED document
+3. Confirm the action (returns to DRAFT state)
 
 ## Development
 
+### Project Architecture
+
+The application follows a modular architecture:
+
+1. **API Layer** (`scripts/api.js`): Handles all HTTP communications
+2. **Utility Layer** (`scripts/utils.js`): Provides formatting and helper functions
+3. **UI Layer** (`scripts/ui.js`): Contains all UI modules and forms
+4. **Application Layer** (`scripts/app.js`): Manages initialization and state
+
 ### Adding a New Module
 
-1. Add a navigation button in `index.html`:
+1. Add navigation item in `index.html`:
 ```html
 <button class="nav-item" data-module="new-module">
-    <span class="icon">🔧</span>
+    <span class="icon">📄</span>
     New Module
 </button>
 ```
 
-2. Create a module function in `app.js`:
+2. Add module function in `scripts/ui.js`:
 ```javascript
-async 'new-module'() {
+modules['new-module'] = async function() {
     document.getElementById('module-title').textContent = 'New Module';
-    // Your code here
-}
+    const contentBody = document.getElementById('content-body');
+
+    // Your module logic here
+};
 ```
 
-3. Add API methods in `api.js` if needed
-
-### Adding Forms
-
-Create functions in `forms.js`:
+3. Add API methods in `scripts/api.js` if needed:
 ```javascript
-async createEntity() {
-    const formHtml = `...`;
-    utils.showModal('Title', formHtml);
-}
-
-async submitEntity(event) {
-    event.preventDefault();
-    // Form processing
+async getNewModuleData() {
+    return this.request('/api/new-module');
 }
 ```
+
+### Code Style
+
+- Use ES6+ features (arrow functions, async/await, template literals)
+- Follow consistent naming conventions (camelCase for variables/functions)
+- Add comments for complex logic
+- Keep functions focused and single-purpose
+- Use CSS variables for theming
+
+## Browser Support
+
+- ✅ Chrome (latest)
+- ✅ Firefox (latest)
+- ✅ Safari (latest)
+- ✅ Edge (latest)
+
+## Responsive Design
+
+The application is fully responsive and supports:
+- **Desktop** (1024px+): Full sidebar and features
+- **Tablet** (768px - 1024px): Optimized layout
+- **Mobile** (< 768px): Collapsible navigation, touch-friendly interface
+
+## Performance Optimization
+
+- Lazy loading of data
+- Pagination for large datasets (default: 20 items per page)
+- Efficient DOM manipulation
+- LocalStorage caching for navigation state
+- Debounced search inputs
+- Minimal external dependencies
+
+## Security Considerations
+
+- Client-side validation for all forms
+- HTTPS communication with API
+- No sensitive data stored in localStorage
+- CORS-enabled API endpoints
+- Input sanitization
+- Error handling for failed requests
+
+## Troubleshooting
+
+### API Connection Issues
+
+If the status indicator shows "Not Connected":
+1. Check if the backend API is running
+2. Verify the `API_BASE_URL` in `scripts/api.js`
+3. Check browser console for CORS errors
+4. Ensure network connectivity
+5. Test the API directly: https://api.tarasantoniuk.com
+
+### Data Not Loading
+
+1. Open browser Developer Tools (F12)
+2. Check **Console** tab for JavaScript errors
+3. Check **Network** tab for failed API requests
+4. Verify API endpoint responses in Network tab
+5. Check for proper authentication (if implemented)
+
+### Form Submission Errors
+
+1. Ensure all required fields are filled
+2. Check field formats (dates, numbers)
+3. Verify data types match API expectations
+4. Check console for validation errors
+
+## Future Enhancements
+
+- [ ] User authentication and authorization
+- [ ] Multi-language support (i18n)
+- [ ] Dark mode theme
+- [ ] Export to Excel/PDF
+- [ ] Advanced search and filtering
+- [ ] Batch operations for bulk updates
+- [ ] Offline mode with service workers
+- [ ] Real-time updates via WebSocket
+- [ ] Chart.js integration for reports
+- [ ] Mobile native app wrapper
 
 ## Known Limitations
 
-- ❌ Edit forms are not fully implemented yet
-- ❌ Reports module is in development
-- ❌ Currency rates and accounting policy - basic functionality
-- ❌ No frontend authentication
+- No authentication system (planned)
+- Reports module is basic (in development)
+- No bulk import/export (planned)
+- Limited offline functionality
 
-## TODO
+## Contributing
 
-- [ ] Implement edit forms for all entities
-- [ ] Add reports module
-- [ ] Add charts and diagrams
-- [ ] Implement export to Excel/PDF
-- [ ] Add search and advanced filters
-- [ ] Mobile adaptation
-- [ ] Dark theme
-- [ ] Internationalization
+Contributions are welcome! Please follow these steps:
 
-## Support
+1. Fork the repository
+2. Create a feature branch (`git checkout -b feature/amazing-feature`)
+3. Commit your changes (`git commit -m 'Add amazing feature'`)
+4. Push to the branch (`git push origin feature/amazing-feature`)
+5. Open a Pull Request
 
-For questions and suggestions:
-- Email: bronya2004@gmail.com
-- API Docs: https://api.tarasantoniuk.com/swagger-ui.html
+### Development Guidelines
+
+- Write clean, readable code
+- Add comments for complex logic
+- Test thoroughly across browsers
+- Follow existing code style
+- Update documentation as needed
 
 ## License
 
 Apache 2.0
+
+## Contact
+
+For questions or support, please contact:
+- **Email**: bronya2004@gmail.com
+- **Website**: https://tarasantoniuk.com
+- **API Docs**: https://api.tarasantoniuk.com/swagger-ui.html
+
+## Changelog
+
+### Version 1.1.0 (Current)
+- ✅ Project restructuring: organized folders (styles/, scripts/, assets/)
+- ✅ Split CSS into modular files (style.css, components.css, responsive.css)
+- ✅ Split JavaScript into modular files (api.js, utils.js, ui.js, app.js)
+- ✅ Updated API for bank-receipts and bank-payments
+- ✅ Changed `documentDate` to `transactionDateTime` with datetime support
+- ✅ Added new fields: paymentReference, valueDate, externalTransactionId, bankReference
+- ✅ Full edit functionality for payments and receipts
+- ✅ Comprehensive README documentation
+
+### Version 1.0.0
+- Initial release
+- Complete banking operations module
+- Responsive design implementation
+- API integration with backend
+- Collapsible navigation system
+- Toast notifications
+- Modal dialogs
+- Pagination support
+
+---
+
+**Built with ❤️ using Vanilla JavaScript**
