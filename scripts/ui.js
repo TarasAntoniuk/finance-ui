@@ -732,11 +732,69 @@ const modules = {
         document.getElementById('module-title').textContent = 'Account Turnovers';
         const contentBody = document.getElementById('content-body');
 
-        // Get current quarter dates
-        const now = new Date();
-        const quarter = Math.floor(now.getMonth() / 3);
-        const startDate = new Date(now.getFullYear(), quarter * 3, 1).toISOString().split('T')[0];
-        const endDate = new Date(now.getFullYear(), quarter * 3 + 3, 0).toISOString().split('T')[0];
+        // Period calculation helpers
+        const formatDateLocal = (date) => {
+            const year = date.getFullYear();
+            const month = String(date.getMonth() + 1).padStart(2, '0');
+            const day = String(date.getDate()).padStart(2, '0');
+            return `${year}-${month}-${day}`;
+        };
+
+        const calculatePeriodDates = (periodType, referenceDate = new Date()) => {
+            const date = new Date(referenceDate);
+            let startDate, endDate;
+
+            switch (periodType) {
+                case 'DAY':
+                    startDate = new Date(date.getFullYear(), date.getMonth(), date.getDate());
+                    endDate = new Date(date.getFullYear(), date.getMonth(), date.getDate());
+                    break;
+                case 'MONTH':
+                    startDate = new Date(date.getFullYear(), date.getMonth(), 1);
+                    endDate = new Date(date.getFullYear(), date.getMonth() + 1, 0);
+                    break;
+                case 'QUARTER':
+                    const quarter = Math.floor(date.getMonth() / 3);
+                    startDate = new Date(date.getFullYear(), quarter * 3, 1);
+                    endDate = new Date(date.getFullYear(), quarter * 3 + 3, 0);
+                    break;
+                case 'YEAR':
+                    startDate = new Date(date.getFullYear(), 0, 1);
+                    endDate = new Date(date.getFullYear(), 11, 31);
+                    break;
+                default:
+                    return null;
+            }
+
+            return {
+                startDate: formatDateLocal(startDate),
+                endDate: formatDateLocal(endDate)
+            };
+        };
+
+        const navigatePeriod = (periodType, currentStart, direction) => {
+            const date = new Date(currentStart);
+
+            switch (periodType) {
+                case 'DAY':
+                    date.setDate(date.getDate() + direction);
+                    break;
+                case 'MONTH':
+                    date.setMonth(date.getMonth() + direction);
+                    break;
+                case 'QUARTER':
+                    date.setMonth(date.getMonth() + (direction * 3));
+                    break;
+                case 'YEAR':
+                    date.setFullYear(date.getFullYear() + direction);
+                    break;
+            }
+
+            return calculatePeriodDates(periodType, date);
+        };
+
+        // Get current month dates as default
+        const initialPeriod = calculatePeriodDates('MONTH');
 
         contentBody.innerHTML = `
             <div class="action-bar">
@@ -744,8 +802,17 @@ const modules = {
                     <h3>Account Turnover Report</h3>
                 </div>
                 <div class="action-bar-right">
-                    <input type="date" id="start-date" value="${startDate}">
-                    <input type="date" id="end-date" value="${endDate}">
+                    <select id="period-type">
+                        <option value="DAY">Day</option>
+                        <option value="MONTH" selected>Month</option>
+                        <option value="QUARTER">Quarter</option>
+                        <option value="YEAR">Year</option>
+                        <option value="CUSTOM">Custom</option>
+                    </select>
+                    <button class="btn" id="prev-period" title="Previous period">◀</button>
+                    <input type="date" id="start-date" value="${initialPeriod.startDate}">
+                    <input type="date" id="end-date" value="${initialPeriod.endDate}">
+                    <button class="btn" id="next-period" title="Next period">▶</button>
                     <select id="org-filter-turnover">
                         <option value="">All Organizations</option>
                     </select>
@@ -766,6 +833,65 @@ const modules = {
                 </div>
             </div>
         `;
+
+        // Setup period controls event listeners
+        const periodTypeSelect = document.getElementById('period-type');
+        const startDateInput = document.getElementById('start-date');
+        const endDateInput = document.getElementById('end-date');
+        const prevButton = document.getElementById('prev-period');
+        const nextButton = document.getElementById('next-period');
+
+        const updateNavigationButtons = () => {
+            const isCustom = periodTypeSelect.value === 'CUSTOM';
+            prevButton.disabled = isCustom;
+            nextButton.disabled = isCustom;
+            prevButton.style.opacity = isCustom ? '0.5' : '1';
+            nextButton.style.opacity = isCustom ? '0.5' : '1';
+        };
+
+        periodTypeSelect.addEventListener('change', (e) => {
+            const periodType = e.target.value;
+
+            if (periodType !== 'CUSTOM') {
+                const dates = calculatePeriodDates(periodType);
+                startDateInput.value = dates.startDate;
+                endDateInput.value = dates.endDate;
+            }
+
+            updateNavigationButtons();
+        });
+
+        prevButton.addEventListener('click', () => {
+            const periodType = periodTypeSelect.value;
+            if (periodType !== 'CUSTOM') {
+                const dates = navigatePeriod(periodType, startDateInput.value, -1);
+                startDateInput.value = dates.startDate;
+                endDateInput.value = dates.endDate;
+            }
+        });
+
+        nextButton.addEventListener('click', () => {
+            const periodType = periodTypeSelect.value;
+            if (periodType !== 'CUSTOM') {
+                const dates = navigatePeriod(periodType, startDateInput.value, 1);
+                startDateInput.value = dates.startDate;
+                endDateInput.value = dates.endDate;
+            }
+        });
+
+        // Switch to custom when dates are manually edited
+        const onManualDateChange = () => {
+            if (periodTypeSelect.value !== 'CUSTOM') {
+                periodTypeSelect.value = 'CUSTOM';
+                updateNavigationButtons();
+            }
+        };
+
+        startDateInput.addEventListener('change', onManualDateChange);
+        endDateInput.addEventListener('change', onManualDateChange);
+
+        // Initialize navigation button state
+        updateNavigationButtons();
 
         try {
             // Load filter options

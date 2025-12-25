@@ -188,8 +188,8 @@
           "required": true
         },
         "responses": {
-          "404": {
-            "description": "Bank receipt not found",
+          "200": {
+            "description": "Bank receipt updated successfully",
             "content": {
               "*/*": {
                 "schema": {
@@ -198,8 +198,8 @@
               }
             }
           },
-          "200": {
-            "description": "Bank receipt updated successfully",
+          "404": {
+            "description": "Bank receipt not found",
             "content": {
               "*/*": {
                 "schema": {
@@ -284,6 +284,9 @@
           }
         ],
         "responses": {
+          "404": {
+            "description": "Bank payment not found"
+          },
           "200": {
             "description": "Bank payment found",
             "content": {
@@ -293,9 +296,6 @@
                 }
               }
             }
-          },
-          "404": {
-            "description": "Bank payment not found"
           }
         }
       },
@@ -329,6 +329,9 @@
           "required": true
         },
         "responses": {
+          "400": {
+            "description": "Invalid data or document already posted"
+          },
           "404": {
             "description": "Bank payment not found"
           },
@@ -341,9 +344,6 @@
                 }
               }
             }
-          },
-          "400": {
-            "description": "Invalid data or document already posted"
           }
         }
       },
@@ -367,11 +367,11 @@
           }
         ],
         "responses": {
-          "400": {
-            "description": "Cannot delete posted document"
-          },
           "204": {
             "description": "Bank payment successfully deleted"
+          },
+          "400": {
+            "description": "Cannot delete posted document"
           },
           "404": {
             "description": "Bank payment not found"
@@ -1556,6 +1556,16 @@
           "required": true
         },
         "responses": {
+          "201": {
+            "description": "Bank receipt created successfully",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/BankReceiptResponseDto"
+                }
+              }
+            }
+          },
           "409": {
             "description": "Receipt with external transaction ID already exists",
             "content": {
@@ -1578,16 +1588,6 @@
           },
           "404": {
             "description": "Related entity not found",
-            "content": {
-              "*/*": {
-                "schema": {
-                  "$ref": "#/components/schemas/BankReceiptResponseDto"
-                }
-              }
-            }
-          },
-          "201": {
-            "description": "Bank receipt created successfully",
             "content": {
               "*/*": {
                 "schema": {
@@ -1631,8 +1631,8 @@
               }
             }
           },
-          "404": {
-            "description": "Bank receipt not found",
+          "200": {
+            "description": "Bank receipt successfully unposted",
             "content": {
               "*/*": {
                 "schema": {
@@ -1641,8 +1641,8 @@
               }
             }
           },
-          "200": {
-            "description": "Bank receipt successfully unposted",
+          "404": {
+            "description": "Bank receipt not found",
             "content": {
               "*/*": {
                 "schema": {
@@ -1825,6 +1825,9 @@
           "required": true
         },
         "responses": {
+          "404": {
+            "description": "Account or counterparty not found"
+          },
           "400": {
             "description": "Invalid request data"
           },
@@ -1837,9 +1840,6 @@
                 }
               }
             }
-          },
-          "404": {
-            "description": "Account or counterparty not found"
           }
         }
       }
@@ -1865,8 +1865,8 @@
           }
         ],
         "responses": {
-          "404": {
-            "description": "Bank payment not found"
+          "400": {
+            "description": "Document not posted or cannot be unposted"
           },
           "200": {
             "description": "Bank payment successfully unposted",
@@ -1878,8 +1878,8 @@
               }
             }
           },
-          "400": {
-            "description": "Document not posted or cannot be unposted"
+          "404": {
+            "description": "Bank payment not found"
           }
         }
       }
@@ -3158,13 +3158,31 @@
           "Banking - Banking Reports"
         ],
         "summary": "Get account turnover report",
-        "description": "Generate report showing account turnovers (receipts and payments) for a specified period.\n\nReturns:\n- Opening balance\n- Debit/credit turnovers\n- Closing balance\n- Transaction count for each account\n\nDefault period: current quarter (Q4 2025: October 1 - December 31)\nMaximum period: 365 days\n\nExample: /api/v1/banking/reports/account-turnovers?startDate=2025-10-01&endDate=2025-12-31&organizationId=1\n",
+        "description": "Generate report showing account turnovers (receipts and payments) for a specified period.\n\nReturns:\n- Opening balance\n- Debit/credit turnovers\n- Closing balance\n- Transaction count for each account\n\nPeriod Types:\n- DAY: Single day (defaults to today if no date specified)\n- MONTH: Full month (first to last day)\n- QUARTER: Full quarter (3 months) - DEFAULT\n- YEAR: Full year (January 1 to December 31)\n- CUSTOM: Custom date range (requires both startDate and endDate)\n\nThe client sends period type and date boundaries, backend validates and applies them.\nMaximum period: 365 days\n\nExamples:\n- Current quarter: /api/v1/banking/reports/account-turnovers\n- Specific month: /api/v1/banking/reports/account-turnovers?periodType=MONTH&startDate=2025-10-01\n- Custom range: /api/v1/banking/reports/account-turnovers?periodType=CUSTOM&startDate=2025-10-01&endDate=2025-12-31\n",
         "operationId": "getAccountTurnovers",
         "parameters": [
           {
+            "name": "periodType",
+            "in": "query",
+            "description": "Period type (DAY, MONTH, QUARTER, YEAR, CUSTOM). Default: QUARTER",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "description": "Report period type",
+              "enum": [
+                "DAY",
+                "MONTH",
+                "QUARTER",
+                "YEAR",
+                "CUSTOM"
+              ]
+            },
+            "example": "QUARTER"
+          },
+          {
             "name": "startDate",
             "in": "query",
-            "description": "Period start date (default: first day of current quarter)",
+            "description": "Period start date. For CUSTOM - required. For others - optional (used to determine which day/month/quarter/year). If not provided, defaults to current period.",
             "required": false,
             "schema": {
               "type": "string",
@@ -3175,7 +3193,7 @@
           {
             "name": "endDate",
             "in": "query",
-            "description": "Period end date (default: last day of current quarter)",
+            "description": "Period end date. Required only for CUSTOM period type. Ignored for other period types (boundaries calculated automatically).",
             "required": false,
             "schema": {
               "type": "string",
@@ -3229,7 +3247,7 @@
             }
           },
           "400": {
-            "description": "Invalid request parameters (invalid period or period \u003E 365 days)",
+            "description": "Invalid request parameters (invalid period type, missing dates for CUSTOM, or period \u003E 365 days)",
             "content": {
               "*/*": {
                 "schema": {
@@ -6685,6 +6703,18 @@
       "ReportPeriodDto": {
         "type": "object",
         "properties": {
+          "periodType": {
+            "type": "string",
+            "description": "Report period type",
+            "example": "QUARTER",
+            "enum": [
+              "DAY",
+              "MONTH",
+              "QUARTER",
+              "YEAR",
+              "CUSTOM"
+            ]
+          },
           "startDate": {
             "type": "string",
             "description": "Period start date",
