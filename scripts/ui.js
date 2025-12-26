@@ -773,7 +773,9 @@ const modules = {
         };
 
         const navigatePeriod = (periodType, currentStart, direction) => {
-            const date = new Date(currentStart);
+            // Parse date in local timezone to avoid UTC conversion issues
+            const parts = currentStart.split('-');
+            const date = new Date(parseInt(parts[0]), parseInt(parts[1]) - 1, parseInt(parts[2]));
 
             switch (periodType) {
                 case 'DAY':
@@ -822,7 +824,7 @@ const modules = {
                     <select id="currency-filter-turnover">
                         <option value="">All Currencies</option>
                     </select>
-                    <button class="btn btn-primary" onclick="modules['account-turnovers']()">
+                    <button class="btn btn-primary" id="generate-turnover-report">
                         🔍 Generate Report
                     </button>
                 </div>
@@ -893,6 +895,84 @@ const modules = {
         // Initialize navigation button state
         updateNavigationButtons();
 
+        // Function to load and display the report
+        const loadTurnoverReport = async () => {
+            try {
+                const periodType = document.getElementById('period-type').value;
+                const start = document.getElementById('start-date').value;
+                const end = document.getElementById('end-date').value;
+                const orgId = document.getElementById('org-filter-turnover').value || null;
+                const accId = document.getElementById('account-filter').value || null;
+                const currId = document.getElementById('currency-filter-turnover').value || null;
+
+                const report = await api.getAccountTurnovers(periodType, start, end, orgId, accId, currId);
+
+                const reportContent = document.getElementById('report-content-turnover');
+                reportContent.innerHTML = `
+                    <div class="report-header">
+                        <p><strong>Period:</strong> ${utils.formatDate(report.period.startDate)} - ${utils.formatDate(report.period.endDate)}</p>
+                        <p><strong>Generated:</strong> ${utils.formatDateTime(report.generatedAt)}</p>
+                        <p><strong>Total Accounts:</strong> ${report.totalAccounts}</p>
+                    </div>
+
+                    <div class="table-container">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Organization</th>
+                                    <th>Account Number</th>
+                                    <th>Bank</th>
+                                    <th>Currency</th>
+                                    <th class="text-right">Opening Balance</th>
+                                    <th class="text-right">Debit Turnover</th>
+                                    <th class="text-right">Credit Turnover</th>
+                                    <th class="text-right">Closing Balance</th>
+                                    <th class="text-center">Transactions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                ${report.accounts.map(acc => `
+                                    <tr>
+                                        <td>${acc.organizationName}</td>
+                                        <td>${acc.accountNumber}</td>
+                                        <td>${acc.bankName} (${acc.bankSwiftCode})</td>
+                                        <td>${acc.currencyCode}</td>
+                                        <td class="text-right">${utils.formatCurrency(acc.openingBalance, acc.currencySymbol)}</td>
+                                        <td class="text-right" style="color: var(--success-color);">${utils.formatCurrency(acc.debitTurnover, acc.currencySymbol)}</td>
+                                        <td class="text-right" style="color: var(--danger-color);">${utils.formatCurrency(acc.creditTurnover, acc.currencySymbol)}</td>
+                                        <td class="text-right"><strong>${utils.formatCurrency(acc.closingBalance, acc.currencySymbol)}</strong></td>
+                                        <td class="text-center">${acc.transactionCount}</td>
+                                    </tr>
+                                `).join('')}
+                            </tbody>
+                        </table>
+                    </div>
+
+                    ${Object.keys(report.summaryByCurrency).length > 0 ? `
+                        <div class="report-summary">
+                            <h4>Summary Totals by Currency</h4>
+                            <div class="quick-stats">
+                                ${Object.entries(report.summaryByCurrency).map(([currency, summary]) => `
+                                    <div class="stat-card">
+                                        <h4>${currency}</h4>
+                                        <p><small>Opening:</small> ${utils.formatNumber(summary.totalOpeningBalance, 2)}</p>
+                                        <p style="color: var(--success-color);"><small>Debit:</small> ${utils.formatNumber(summary.totalDebitTurnover, 2)}</p>
+                                        <p style="color: var(--danger-color);"><small>Credit:</small> ${utils.formatNumber(summary.totalCreditTurnover, 2)}</p>
+                                        <p class="stat-value">${utils.formatNumber(summary.totalClosingBalance, 2)}</p>
+                                    </div>
+                                `).join('')}
+                            </div>
+                        </div>
+                    ` : ''}
+                `;
+            } catch (error) {
+                utils.showToast('Error loading report: ' + error.message, 'error');
+            }
+        };
+
+        // Add event listener to generate report button
+        document.getElementById('generate-turnover-report').addEventListener('click', loadTurnoverReport);
+
         try {
             // Load filter options
             const [organizations, accounts, currencies] = await Promise.all([
@@ -924,77 +1004,8 @@ const modules = {
                 option.textContent = `${curr.code} - ${curr.name}`;
                 currFilter.appendChild(option);
             });
-
-            // Load report data
-            const periodType = document.getElementById('period-type').value;
-            const start = document.getElementById('start-date').value;
-            const end = document.getElementById('end-date').value;
-            const orgId = document.getElementById('org-filter-turnover').value || null;
-            const accId = document.getElementById('account-filter').value || null;
-            const currId = document.getElementById('currency-filter-turnover').value || null;
-
-            const report = await api.getAccountTurnovers(periodType, start, end, orgId, accId, currId);
-
-            const reportContent = document.getElementById('report-content-turnover');
-            reportContent.innerHTML = `
-                <div class="report-header">
-                    <p><strong>Period:</strong> ${utils.formatDate(report.period.startDate)} - ${utils.formatDate(report.period.endDate)}</p>
-                    <p><strong>Generated:</strong> ${utils.formatDateTime(report.generatedAt)}</p>
-                    <p><strong>Total Accounts:</strong> ${report.totalAccounts}</p>
-                </div>
-
-                <div class="table-container">
-                    <table>
-                        <thead>
-                            <tr>
-                                <th>Organization</th>
-                                <th>Account Number</th>
-                                <th>Bank</th>
-                                <th>Currency</th>
-                                <th class="text-right">Opening Balance</th>
-                                <th class="text-right">Debit Turnover</th>
-                                <th class="text-right">Credit Turnover</th>
-                                <th class="text-right">Closing Balance</th>
-                                <th class="text-center">Transactions</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            ${report.accounts.map(acc => `
-                                <tr>
-                                    <td>${acc.organizationName}</td>
-                                    <td>${acc.accountNumber}</td>
-                                    <td>${acc.bankName} (${acc.bankSwiftCode})</td>
-                                    <td>${acc.currencyCode}</td>
-                                    <td class="text-right">${utils.formatCurrency(acc.openingBalance, acc.currencySymbol)}</td>
-                                    <td class="text-right" style="color: var(--success-color);">${utils.formatCurrency(acc.debitTurnover, acc.currencySymbol)}</td>
-                                    <td class="text-right" style="color: var(--danger-color);">${utils.formatCurrency(acc.creditTurnover, acc.currencySymbol)}</td>
-                                    <td class="text-right"><strong>${utils.formatCurrency(acc.closingBalance, acc.currencySymbol)}</strong></td>
-                                    <td class="text-center">${acc.transactionCount}</td>
-                                </tr>
-                            `).join('')}
-                        </tbody>
-                    </table>
-                </div>
-
-                ${Object.keys(report.summaryByCurrency).length > 0 ? `
-                    <div class="report-summary">
-                        <h4>Summary Totals by Currency</h4>
-                        <div class="quick-stats">
-                            ${Object.entries(report.summaryByCurrency).map(([currency, summary]) => `
-                                <div class="stat-card">
-                                    <h4>${currency}</h4>
-                                    <p><small>Opening:</small> ${utils.formatNumber(summary.totalOpeningBalance, 2)}</p>
-                                    <p style="color: var(--success-color);"><small>Debit:</small> ${utils.formatNumber(summary.totalDebitTurnover, 2)}</p>
-                                    <p style="color: var(--danger-color);"><small>Credit:</small> ${utils.formatNumber(summary.totalCreditTurnover, 2)}</p>
-                                    <p class="stat-value">${utils.formatNumber(summary.totalClosingBalance, 2)}</p>
-                                </div>
-                            `).join('')}
-                        </div>
-                    </div>
-                ` : ''}
-            `;
         } catch (error) {
-            utils.showToast('Error loading report: ' + error.message, 'error');
+            utils.showToast('Error loading filters: ' + error.message, 'error');
         }
     }
 };
