@@ -209,22 +209,36 @@ Object.assign(modules, {
                                     <th class="text-right">Credit Turnover</th>
                                     <th class="text-right">Closing Balance</th>
                                     <th class="text-center">Transactions</th>
+                                    <th class="text-center">Actions</th>
                                 </tr>
                             </thead>
                             <tbody>
-                                ${report.accounts.map(acc => `
-                                    <tr>
-                                        <td>${acc.organizationName}</td>
-                                        <td>${acc.accountNumber}</td>
-                                        <td>${acc.bankName} (${acc.bankSwiftCode})</td>
-                                        <td>${acc.currencyCode}</td>
-                                        <td class="text-right">${utils.formatCurrency(acc.openingBalance, acc.currencySymbol)}</td>
-                                        <td class="text-right" style="color: var(--success-color);">${utils.formatCurrency(acc.debitTurnover, acc.currencySymbol)}</td>
-                                        <td class="text-right" style="color: var(--danger-color);">${utils.formatCurrency(acc.creditTurnover, acc.currencySymbol)}</td>
-                                        <td class="text-right"><strong>${utils.formatCurrency(acc.closingBalance, acc.currencySymbol)}</strong></td>
-                                        <td class="text-center">${acc.transactionCount}</td>
-                                    </tr>
-                                `).join('')}
+                                ${report.accounts.map(acc => {
+                                    const orgId = document.getElementById('org-filter-turnover').value || acc.organizationId;
+                                    const startDate = document.getElementById('start-date').value;
+                                    const endDate = document.getElementById('end-date').value;
+
+                                    return `
+                                        <tr>
+                                            <td>${acc.organizationName}</td>
+                                            <td>${acc.accountNumber}</td>
+                                            <td>${acc.bankName} (${acc.bankSwiftCode})</td>
+                                            <td>${acc.currencyCode}</td>
+                                            <td class="text-right">${utils.formatCurrency(acc.openingBalance, acc.currencySymbol)}</td>
+                                            <td class="text-right" style="color: var(--success-color);">${utils.formatCurrency(acc.debitTurnover, acc.currencySymbol)}</td>
+                                            <td class="text-right" style="color: var(--danger-color);">${utils.formatCurrency(acc.creditTurnover, acc.currencySymbol)}</td>
+                                            <td class="text-right"><strong>${utils.formatCurrency(acc.closingBalance, acc.currencySymbol)}</strong></td>
+                                            <td class="text-center">${acc.transactionCount}</td>
+                                            <td class="text-center">
+                                                <button class="btn btn-sm"
+                                                    onclick="modules['account-turnover-details'](${acc.accountId}, '${startDate}', '${endDate}', ${orgId})"
+                                                    title="View detailed movements">
+                                                    🔍 Details
+                                                </button>
+                                            </td>
+                                        </tr>
+                                    `;
+                                }).join('')}
                             </tbody>
                         </table>
                     </div>

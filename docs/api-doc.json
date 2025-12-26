@@ -29,10 +29,6 @@
       "description": "Bank payment management API"
     },
     {
-      "name": "Banking - Banking Reports",
-      "description": "Banking reports and analytics endpoints"
-    },
-    {
       "name": "Banking - Bank Receipts",
       "description": "Operations for managing bank receipt documents"
     },
@@ -71,6 +67,14 @@
     {
       "name": "Debug",
       "description": "Debug and performance monitoring endpoints"
+    },
+    {
+      "name": "Banking - Banking Reports - Account Balance",
+      "description": "Banking report Account Balance"
+    },
+    {
+      "name": "Banking - Banking Reports - Account Turnover",
+      "description": "Banking report - Account Turnover"
     },
     {
       "name": "Banking - Bank Accounts",
@@ -188,6 +192,16 @@
           "required": true
         },
         "responses": {
+          "200": {
+            "description": "Bank receipt updated successfully",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/BankReceiptResponseDto"
+                }
+              }
+            }
+          },
           "404": {
             "description": "Bank receipt not found",
             "content": {
@@ -210,16 +224,6 @@
           },
           "400": {
             "description": "Invalid input data",
-            "content": {
-              "*/*": {
-                "schema": {
-                  "$ref": "#/components/schemas/BankReceiptResponseDto"
-                }
-              }
-            }
-          },
-          "200": {
-            "description": "Bank receipt updated successfully",
             "content": {
               "*/*": {
                 "schema": {
@@ -284,6 +288,9 @@
           }
         ],
         "responses": {
+          "404": {
+            "description": "Bank payment not found"
+          },
           "200": {
             "description": "Bank payment found",
             "content": {
@@ -293,9 +300,6 @@
                 }
               }
             }
-          },
-          "404": {
-            "description": "Bank payment not found"
           }
         }
       },
@@ -329,6 +333,12 @@
           "required": true
         },
         "responses": {
+          "400": {
+            "description": "Invalid data or document already posted"
+          },
+          "404": {
+            "description": "Bank payment not found"
+          },
           "200": {
             "description": "Bank payment successfully updated",
             "content": {
@@ -338,12 +348,6 @@
                 }
               }
             }
-          },
-          "400": {
-            "description": "Invalid data or document already posted"
-          },
-          "404": {
-            "description": "Bank payment not found"
           }
         }
       },
@@ -367,14 +371,14 @@
           }
         ],
         "responses": {
-          "204": {
-            "description": "Bank payment successfully deleted"
-          },
           "400": {
             "description": "Cannot delete posted document"
           },
           "404": {
             "description": "Bank payment not found"
+          },
+          "204": {
+            "description": "Bank payment successfully deleted"
           }
         }
       }
@@ -1556,16 +1560,6 @@
           "required": true
         },
         "responses": {
-          "201": {
-            "description": "Bank receipt created successfully",
-            "content": {
-              "*/*": {
-                "schema": {
-                  "$ref": "#/components/schemas/BankReceiptResponseDto"
-                }
-              }
-            }
-          },
           "409": {
             "description": "Receipt with external transaction ID already exists",
             "content": {
@@ -1588,6 +1582,16 @@
           },
           "404": {
             "description": "Related entity not found",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/BankReceiptResponseDto"
+                }
+              }
+            }
+          },
+          "201": {
+            "description": "Bank receipt created successfully",
             "content": {
               "*/*": {
                 "schema": {
@@ -1706,8 +1710,8 @@
               }
             }
           },
-          "200": {
-            "description": "Bank receipt successfully posted",
+          "404": {
+            "description": "Bank receipt not found",
             "content": {
               "*/*": {
                 "schema": {
@@ -1716,8 +1720,8 @@
               }
             }
           },
-          "404": {
-            "description": "Bank receipt not found",
+          "200": {
+            "description": "Bank receipt successfully posted",
             "content": {
               "*/*": {
                 "schema": {
@@ -1825,8 +1829,8 @@
           "required": true
         },
         "responses": {
-          "404": {
-            "description": "Account or counterparty not found"
+          "400": {
+            "description": "Invalid request data"
           },
           "201": {
             "description": "Bank payment successfully created",
@@ -1838,8 +1842,8 @@
               }
             }
           },
-          "400": {
-            "description": "Invalid request data"
+          "404": {
+            "description": "Account or counterparty not found"
           }
         }
       }
@@ -1865,9 +1869,6 @@
           }
         ],
         "responses": {
-          "400": {
-            "description": "Document not posted or cannot be unposted"
-          },
           "200": {
             "description": "Bank payment successfully unposted",
             "content": {
@@ -1880,6 +1881,9 @@
           },
           "404": {
             "description": "Bank payment not found"
+          },
+          "400": {
+            "description": "Document not posted or cannot be unposted"
           }
         }
       }
@@ -1908,6 +1912,9 @@
           "400": {
             "description": "Document already posted or cannot be posted"
           },
+          "404": {
+            "description": "Bank payment not found"
+          },
           "200": {
             "description": "Bank payment successfully posted",
             "content": {
@@ -1917,9 +1924,6 @@
                 }
               }
             }
-          },
-          "404": {
-            "description": "Bank payment not found"
           }
         }
       }
@@ -3152,10 +3156,10 @@
         }
       }
     },
-    "/api/v1/banking/reports/account-turnovers": {
+    "/api/v1/banking/reports/accountturnover/account-turnovers": {
       "get": {
         "tags": [
-          "Banking - Banking Reports"
+          "Banking - Banking Reports - Account Turnover"
         ],
         "summary": "Get account turnover report",
         "description": "Generate report showing account turnovers (receipts and payments) for a specified period.\n\nReturns:\n- Opening balance\n- Debit/credit turnovers\n- Closing balance\n- Transaction count for each account\n\nPeriod Types:\n- DAY: Single day (defaults to today if no date specified)\n- MONTH: Full month (first to last day)\n- QUARTER: Full quarter (3 months) - DEFAULT\n- YEAR: Full year (January 1 to December 31)\n- CUSTOM: Custom date range (requires both startDate and endDate)\n\nThe client sends period type and date boundaries, backend validates and applies them.\nMaximum period: 365 days\n\nExamples:\n- Current quarter: /api/v1/banking/reports/account-turnovers\n- Specific month: /api/v1/banking/reports/account-turnovers?periodType=MONTH&startDate=2025-10-01\n- Custom range: /api/v1/banking/reports/account-turnovers?periodType=CUSTOM&startDate=2025-10-01&endDate=2025-12-31\n",
@@ -3259,10 +3263,98 @@
         }
       }
     },
-    "/api/v1/banking/reports/account-balances": {
+    "/api/v1/banking/reports/accountturnover/account-turnovers/{accountId}/details": {
       "get": {
         "tags": [
-          "Banking - Banking Reports"
+          "Banking - Banking Reports - Account Turnover"
+        ],
+        "summary": "Get detailed account turnover with all movements",
+        "description": "Generate detailed drill-down report for a specific account showing all movements within a date range.\n\nReturns:\n- Account details (number, name, currency)\n- Opening balance (before start date)\n- All movements within the date range\n- Running balance after each movement\n- Closing balance (after last movement)\n\nMovements include:\n- Transaction event details\n- Document type and ID\n- Transaction date and time\n- Description\n- Debit/credit amounts\n- Running balance\n\nExcludes:\n- Reversed events (isReversed = true)\n- Reversal events (documentType ends with \"Reversal\")\n\nExample:\n/api/v1/banking/reports/accountturnover/account-turnovers/1/details?startDate=2025-01-01&endDate=2025-12-31&organizationId=1\n",
+        "operationId": "getAccountTurnoverDetails",
+        "parameters": [
+          {
+            "name": "accountId",
+            "in": "path",
+            "description": "Account ID",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            },
+            "example": 1
+          },
+          {
+            "name": "startDate",
+            "in": "query",
+            "description": "Period start date (required)",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "date"
+            },
+            "example": "2025-01-01"
+          },
+          {
+            "name": "endDate",
+            "in": "query",
+            "description": "Period end date (required)",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "date"
+            },
+            "example": "2025-12-31"
+          },
+          {
+            "name": "organizationId",
+            "in": "query",
+            "description": "Organization ID (required for validation)",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            },
+            "example": 1
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Details report generated successfully",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/AccountTurnoverDetailsDTO"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid request parameters (missing dates or account not found)",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/AccountTurnoverDetailsDTO"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Account not found",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/AccountTurnoverDetailsDTO"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/banking/reports/accountbalance/account-balances": {
+      "get": {
+        "tags": [
+          "Banking - Banking Reports - Account Balance"
         ],
         "summary": "Get account balance report",
         "description": "Generate report showing current balances on all bank accounts with optional filters.\n\nDefault values:\n- asOfDate: today's date\n- All organizations and currencies included if not filtered\n\nExample: /api/v1/banking/reports/account-balances?asOfDate=2025-12-02&organizationId=1\n",
@@ -3821,6 +3913,9 @@
           }
         ],
         "responses": {
+          "404": {
+            "description": "Counterparty not found"
+          },
           "200": {
             "description": "Successfully retrieved list of payments",
             "content": {
@@ -3830,9 +3925,6 @@
                 }
               }
             }
-          },
-          "404": {
-            "description": "Counterparty not found"
           }
         }
       }
@@ -6778,6 +6870,98 @@
           }
         },
         "description": "Report period information"
+      },
+      "AccountTurnoverDetailsDTO": {
+        "type": "object",
+        "properties": {
+          "accountId": {
+            "type": "integer",
+            "description": "Account ID",
+            "format": "int64",
+            "example": 1
+          },
+          "accountNumber": {
+            "type": "string",
+            "description": "Account number",
+            "example": "UA123456789012222222222222222222"
+          },
+          "accountName": {
+            "type": "string",
+            "description": "Account name (Bank + SWIFT)",
+            "example": "BBVA (BBVAESMM)"
+          },
+          "currency": {
+            "type": "string",
+            "description": "Currency code",
+            "example": "EUR"
+          },
+          "openingBalance": {
+            "type": "number",
+            "description": "Opening balance at start of period",
+            "example": 0
+          },
+          "closingBalance": {
+            "type": "number",
+            "description": "Closing balance at end of period",
+            "example": 29000
+          },
+          "movements": {
+            "type": "array",
+            "description": "List of all movements in the period",
+            "items": {
+              "$ref": "#/components/schemas/MovementDTO"
+            }
+          }
+        },
+        "description": "Detailed account turnover report with all movements"
+      },
+      "MovementDTO": {
+        "type": "object",
+        "properties": {
+          "eventId": {
+            "type": "integer",
+            "description": "Transaction event ID",
+            "format": "int64",
+            "example": 80
+          },
+          "documentId": {
+            "type": "integer",
+            "description": "Source document ID",
+            "format": "int64",
+            "example": 52
+          },
+          "documentType": {
+            "type": "string",
+            "description": "Source document type",
+            "example": "BankReceipt"
+          },
+          "documentDate": {
+            "type": "string",
+            "description": "Transaction date and time",
+            "format": "date-time"
+          },
+          "description": {
+            "type": "string",
+            "description": "Transaction description",
+            "example": "Payment from customer"
+          },
+          "debit": {
+            "type": "number",
+            "description": "Debit amount (receipt)",
+            "example": 20000
+          },
+          "credit": {
+            "type": "number",
+            "description": "Credit amount (payment)",
+            "example": 0
+          },
+          "runningBalance": {
+            "type": "number",
+            "description": "Running balance after this transaction",
+            "example": 20000
+          }
+        },
+        "description": "Individual transaction movement in account turnover details"
       },
       "AccountBalanceItemDto": {
         "type": "object",

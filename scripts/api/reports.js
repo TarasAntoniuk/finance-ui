@@ -30,6 +30,15 @@
             if (currencyId) params.append('currencyId', currencyId);
 
             return this.request(`/api/v1/banking/reports/account-turnovers?${params}`);
+        },
+
+        async getAccountTurnoverDetails(accountId, startDate, endDate, organizationId) {
+            const params = new URLSearchParams({
+                startDate,
+                endDate,
+                organizationId: organizationId.toString()
+            });
+            return this.request(`/api/v1/banking/reports/accountturnover/account-turnovers/${accountId}/details?${params}`);
         }
     });
 })();
