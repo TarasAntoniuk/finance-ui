@@ -926,13 +926,14 @@ const modules = {
             });
 
             // Load report data
+            const periodType = document.getElementById('period-type').value;
             const start = document.getElementById('start-date').value;
             const end = document.getElementById('end-date').value;
             const orgId = document.getElementById('org-filter-turnover').value || null;
             const accId = document.getElementById('account-filter').value || null;
             const currId = document.getElementById('currency-filter-turnover').value || null;
 
-            const report = await api.getAccountTurnovers(start, end, orgId, accId, currId);
+            const report = await api.getAccountTurnovers(periodType, start, end, orgId, accId, currId);
 
             const reportContent = document.getElementById('report-content-turnover');
             reportContent.innerHTML = `

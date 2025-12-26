@@ -99,6 +99,16 @@
           }
         ],
         "responses": {
+          "404": {
+            "description": "Bank receipt not found",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/BankReceiptResponseDto"
+                }
+              }
+            }
+          },
           "200": {
             "description": "Bank receipt found",
             "content": {
@@ -145,16 +155,6 @@
                 }
               }
             }
-          },
-          "404": {
-            "description": "Bank receipt not found",
-            "content": {
-              "*/*": {
-                "schema": {
-                  "$ref": "#/components/schemas/BankReceiptResponseDto"
-                }
-              }
-            }
           }
         }
       },
@@ -188,8 +188,8 @@
           "required": true
         },
         "responses": {
-          "200": {
-            "description": "Bank receipt updated successfully",
+          "404": {
+            "description": "Bank receipt not found",
             "content": {
               "*/*": {
                 "schema": {
@@ -198,8 +198,8 @@
               }
             }
           },
-          "404": {
-            "description": "Bank receipt not found",
+          "200": {
+            "description": "Bank receipt updated successfully",
             "content": {
               "*/*": {
                 "schema": {
@@ -1621,8 +1621,8 @@
           }
         ],
         "responses": {
-          "400": {
-            "description": "Document not posted or cannot be unposted",
+          "200": {
+            "description": "Bank receipt successfully unposted",
             "content": {
               "*/*": {
                 "schema": {
@@ -1631,8 +1631,8 @@
               }
             }
           },
-          "200": {
-            "description": "Bank receipt successfully unposted",
+          "400": {
+            "description": "Document not posted or cannot be unposted",
             "content": {
               "*/*": {
                 "schema": {
@@ -1828,9 +1828,6 @@
           "404": {
             "description": "Account or counterparty not found"
           },
-          "400": {
-            "description": "Invalid request data"
-          },
           "201": {
             "description": "Bank payment successfully created",
             "content": {
@@ -1840,6 +1837,9 @@
                 }
               }
             }
+          },
+          "400": {
+            "description": "Invalid request data"
           }
         }
       }
