@@ -256,13 +256,16 @@ Object.assign(modules, {
 
         try {
             // Load filter options
-            const [organizations, accounts, currencies] = await Promise.all([
+            const [organizations, allOrgAccounts, currencies] = await Promise.all([
                 api.getOrganizations(),
-                api.getBankAccounts(),
+                api.getBankAccountsByHolderType('ORGANIZATION'),  // Get only organization accounts
                 api.getCurrencies()
             ]);
 
             const orgFilter = document.getElementById('org-filter-turnover');
+            const accFilter = document.getElementById('account-filter');
+
+            // Populate organizations
             organizations.forEach(org => {
                 const option = document.createElement('option');
                 option.value = org.id;
@@ -270,14 +273,34 @@ Object.assign(modules, {
                 orgFilter.appendChild(option);
             });
 
-            const accFilter = document.getElementById('account-filter');
-            accounts.forEach(acc => {
-                const option = document.createElement('option');
-                option.value = acc.id;
-                option.textContent = `${acc.accountNumber} (${acc.bankName})`;
-                accFilter.appendChild(option);
+            // Function to populate account filter based on selected organization
+            const updateAccountFilter = (selectedOrgId) => {
+                // Clear current options except "All Accounts"
+                accFilter.innerHTML = '<option value="">All Accounts</option>';
+
+                // Filter accounts by selected organization
+                const filteredAccounts = selectedOrgId
+                    ? allOrgAccounts.filter(acc => acc.holderId == selectedOrgId)
+                    : allOrgAccounts;
+
+                // Populate filtered accounts
+                filteredAccounts.forEach(acc => {
+                    const option = document.createElement('option');
+                    option.value = acc.id;
+                    option.textContent = `${acc.accountNumber} (${acc.bankName})`;
+                    accFilter.appendChild(option);
+                });
+            };
+
+            // Add event listener to organization filter
+            orgFilter.addEventListener('change', (e) => {
+                updateAccountFilter(e.target.value);
             });
 
+            // Initial population of all organization accounts
+            updateAccountFilter(null);
+
+            // Populate currencies
             const currFilter = document.getElementById('currency-filter-turnover');
             currencies.forEach(curr => {
                 const option = document.createElement('option');

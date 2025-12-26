@@ -198,16 +198,6 @@
               }
             }
           },
-          "200": {
-            "description": "Bank receipt updated successfully",
-            "content": {
-              "*/*": {
-                "schema": {
-                  "$ref": "#/components/schemas/BankReceiptResponseDto"
-                }
-              }
-            }
-          },
           "409": {
             "description": "Cannot update receipt in current status",
             "content": {
@@ -220,6 +210,16 @@
           },
           "400": {
             "description": "Invalid input data",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/BankReceiptResponseDto"
+                }
+              }
+            }
+          },
+          "200": {
+            "description": "Bank receipt updated successfully",
             "content": {
               "*/*": {
                 "schema": {
@@ -284,9 +284,6 @@
           }
         ],
         "responses": {
-          "404": {
-            "description": "Bank payment not found"
-          },
           "200": {
             "description": "Bank payment found",
             "content": {
@@ -296,6 +293,9 @@
                 }
               }
             }
+          },
+          "404": {
+            "description": "Bank payment not found"
           }
         }
       },
@@ -329,12 +329,6 @@
           "required": true
         },
         "responses": {
-          "400": {
-            "description": "Invalid data or document already posted"
-          },
-          "404": {
-            "description": "Bank payment not found"
-          },
           "200": {
             "description": "Bank payment successfully updated",
             "content": {
@@ -344,6 +338,12 @@
                 }
               }
             }
+          },
+          "400": {
+            "description": "Invalid data or document already posted"
+          },
+          "404": {
+            "description": "Bank payment not found"
           }
         }
       },
@@ -1621,16 +1621,6 @@
           }
         ],
         "responses": {
-          "200": {
-            "description": "Bank receipt successfully unposted",
-            "content": {
-              "*/*": {
-                "schema": {
-                  "$ref": "#/components/schemas/BankReceiptResponseDto"
-                }
-              }
-            }
-          },
           "400": {
             "description": "Document not posted or cannot be unposted",
             "content": {
@@ -1643,6 +1633,16 @@
           },
           "404": {
             "description": "Bank receipt not found",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/BankReceiptResponseDto"
+                }
+              }
+            }
+          },
+          "200": {
+            "description": "Bank receipt successfully unposted",
             "content": {
               "*/*": {
                 "schema": {
@@ -1706,8 +1706,8 @@
               }
             }
           },
-          "404": {
-            "description": "Bank receipt not found",
+          "200": {
+            "description": "Bank receipt successfully posted",
             "content": {
               "*/*": {
                 "schema": {
@@ -1716,8 +1716,8 @@
               }
             }
           },
-          "200": {
-            "description": "Bank receipt successfully posted",
+          "404": {
+            "description": "Bank receipt not found",
             "content": {
               "*/*": {
                 "schema": {
@@ -1905,6 +1905,9 @@
           }
         ],
         "responses": {
+          "400": {
+            "description": "Document already posted or cannot be posted"
+          },
           "200": {
             "description": "Bank payment successfully posted",
             "content": {
@@ -1914,9 +1917,6 @@
                 }
               }
             }
-          },
-          "400": {
-            "description": "Document already posted or cannot be posted"
           },
           "404": {
             "description": "Bank payment not found"
@@ -3821,9 +3821,6 @@
           }
         ],
         "responses": {
-          "404": {
-            "description": "Counterparty not found"
-          },
           "200": {
             "description": "Successfully retrieved list of payments",
             "content": {
@@ -3833,6 +3830,9 @@
                 }
               }
             }
+          },
+          "404": {
+            "description": "Counterparty not found"
           }
         }
       }
@@ -4710,19 +4710,19 @@
         }
       }
     },
-    "/api/bank-accounts/holder/{holderType}/{holderId}": {
+    "/api/bank-accounts/holder/{holderType}": {
       "get": {
         "tags": [
           "Banking - Bank Accounts"
         ],
-        "summary": "Get bank accounts by holder",
-        "description": "Retrieve all bank accounts for a specific holder",
-        "operationId": "getBankAccountsByHolder",
+        "summary": "Get all bank accounts by holder type",
+        "description": "Retrieve all bank accounts for a specific holder type across all holders.\n\n**Usage Examples:**\n- Get ALL organization accounts: `/api/bank-accounts/holder/ORGANIZATION`\n- Get ALL counterparty accounts: `/api/bank-accounts/holder/COUNTERPARTY`\n\n**Use Case:**\nThis endpoint is useful when you need to retrieve all accounts of a certain type without\nfiltering by a specific organization or counterparty. For example, to get all organization\nbank accounts across all organizations in the system.\n\n**Parameters:**\n- `holderType` (required): Type of account holder - must be either ORGANIZATION or COUNTERPARTY\n\n**Response:**\nReturns a list of all bank accounts matching the holder type, including:\n- Account details (number, name, status)\n- Associated bank information\n- Currency information\n- Holder information (organization or counterparty)\n- Default account flag\n\nReturns an empty list if no accounts are found for the specified holder type.\n",
+        "operationId": "getBankAccountsByHolderType",
         "parameters": [
           {
             "name": "holderType",
             "in": "path",
-            "description": "Holder type (ORGANIZATION or COUNTERPARTY)",
+            "description": "Type of account holder to filter by (ORGANIZATION to get all organization accounts, COUNTERPARTY to get all counterparty accounts)",
             "required": true,
             "schema": {
               "type": "string",
@@ -4730,22 +4730,65 @@
                 "ORGANIZATION",
                 "COUNTERPARTY"
               ]
-            }
-          },
-          {
-            "name": "holderId",
-            "in": "path",
-            "description": "Holder ID",
-            "required": true,
-            "schema": {
-              "type": "integer",
-              "format": "int64"
-            }
+            },
+            "example": "ORGANIZATION"
           }
         ],
         "responses": {
           "200": {
-            "description": "Successfully retrieved list",
+            "description": "Successfully retrieved list of all bank accounts by holder type",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/BankAccountResponseDto"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/bank-accounts/holder/{holderType}/{holderId}": {
+      "get": {
+        "tags": [
+          "Banking - Bank Accounts"
+        ],
+        "summary": "Get bank accounts by holder type and holder ID",
+        "description": "Retrieve all bank accounts for a specific holder (organization or counterparty).\n\n**Usage Examples:**\n- Get all accounts for organization #1: `/api/bank-accounts/holder/ORGANIZATION/1`\n- Get all accounts for counterparty #5: `/api/bank-accounts/holder/COUNTERPARTY/5`\n\n**Parameters:**\n- `holderType` (required): Type of account holder - must be either ORGANIZATION or COUNTERPARTY\n- `holderId` (required): Unique identifier of the organization or counterparty\n\n**Response:**\nReturns a list of all bank accounts belonging to the specified holder, including:\n- Account details (number, name, status)\n- Associated bank information\n- Currency information\n- Default account flag\n\nReturns an empty list if no accounts are found for the specified holder.\n",
+        "operationId": "getBankAccountsByHolder",
+        "parameters": [
+          {
+            "name": "holderType",
+            "in": "path",
+            "description": "Type of account holder (ORGANIZATION or COUNTERPARTY)",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "ORGANIZATION",
+                "COUNTERPARTY"
+              ]
+            },
+            "example": "ORGANIZATION"
+          },
+          {
+            "name": "holderId",
+            "in": "path",
+            "description": "Unique identifier of the organization or counterparty",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            },
+            "example": 1
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successfully retrieved list of bank accounts",
             "content": {
               "*/*": {
                 "schema": {

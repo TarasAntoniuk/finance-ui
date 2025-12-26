@@ -5,6 +5,10 @@
             return this.getAll('bank-accounts');
         },
 
+        async getBankAccountsByHolderType(holderType) {
+            return this.request(`/api/bank-accounts/holder/${holderType}`);
+        },
+
         async getBankAccountsByHolder(holderType, holderId) {
             return this.request(`/api/bank-accounts/holder/${holderType}/${holderId}`);
         },
