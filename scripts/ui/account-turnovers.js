@@ -214,7 +214,9 @@ Object.assign(modules, {
                             </thead>
                             <tbody>
                                 ${report.accounts.map(acc => {
-                                    const orgId = document.getElementById('org-filter-turnover').value || acc.organizationId;
+                                    // Get organization ID from filter or use account's organization
+                                    const filterOrgId = document.getElementById('org-filter-turnover').value;
+                                    const orgId = filterOrgId ? filterOrgId : acc.organizationId;
                                     const startDate = document.getElementById('start-date').value;
                                     const endDate = document.getElementById('end-date').value;
 

@@ -38,7 +38,7 @@
                 endDate,
                 organizationId: organizationId.toString()
             });
-            return this.request(`/api/v1/banking/reports/accountturnover/account-turnovers/${accountId}/details?${params}`);
+            return this.request(`/api/v1/banking/reports/account-turnovers/${accountId}/details?${params}`);
         }
     });
 })();
