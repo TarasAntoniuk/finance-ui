@@ -9,63 +9,10 @@ if (typeof modules === 'undefined') {
 
 // Add Account Balances methods
 Object.assign(modules, {
-    // Banking Reports
-    async 'account-balances'() {
-        document.getElementById('module-title').textContent = 'Account Balances';
-        const contentBody = document.getElementById('content-body');
-
-        // Get current date as default
-        const today = new Date().toISOString().split('T')[0];
-
-        contentBody.innerHTML = `
-            <div class="action-bar">
-                <div class="action-bar-left">
-                    <h3>Account Balance Report</h3>
-                </div>
-                <div class="action-bar-right">
-                    <input type="date" id="as-of-date" value="${today}">
-                    <select id="org-filter">
-                        <option value="">All Organizations</option>
-                    </select>
-                    <select id="currency-filter">
-                        <option value="">All Currencies</option>
-                    </select>
-                    <button class="btn btn-primary" onclick="modules['account-balances']()">
-                        🔍 Generate Report
-                    </button>
-                </div>
-            </div>
-            <div id="report-content">
-                <div class="text-center">
-                    <p>Select filters and click "Generate Report"</p>
-                </div>
-            </div>
-        `;
-
+    // Generate account balance report
+    async generateAccountBalanceReport() {
         try {
-            // Load filter options
-            const [organizations, currencies] = await Promise.all([
-                api.getOrganizations(),
-                api.getCurrencies()
-            ]);
-
-            const orgFilter = document.getElementById('org-filter');
-            organizations.forEach(org => {
-                const option = document.createElement('option');
-                option.value = org.id;
-                option.textContent = org.name;
-                orgFilter.appendChild(option);
-            });
-
-            const currFilter = document.getElementById('currency-filter');
-            currencies.forEach(curr => {
-                const option = document.createElement('option');
-                option.value = curr.id;
-                option.textContent = `${curr.code} - ${curr.name}`;
-                currFilter.appendChild(option);
-            });
-
-            // Load report data
+            // Get filter values
             const asOfDate = document.getElementById('as-of-date').value;
             const orgId = document.getElementById('org-filter').value || null;
             const currId = document.getElementById('currency-filter').value || null;
@@ -125,6 +72,66 @@ Object.assign(modules, {
             `;
         } catch (error) {
             utils.showToast('Error loading report: ' + error.message, 'error');
+        }
+    },
+
+    // Banking Reports - Initialize account balances page
+    async 'account-balances'() {
+        document.getElementById('module-title').textContent = 'Account Balances';
+        const contentBody = document.getElementById('content-body');
+
+        // Get current date as default
+        const today = new Date().toISOString().split('T')[0];
+
+        contentBody.innerHTML = `
+            <div class="action-bar">
+                <div class="action-bar-left">
+                    <h3>Account Balance Report</h3>
+                </div>
+                <div class="action-bar-right">
+                    <input type="date" id="as-of-date" value="${today}">
+                    <select id="org-filter">
+                        <option value="">All Organizations</option>
+                    </select>
+                    <select id="currency-filter">
+                        <option value="">All Currencies</option>
+                    </select>
+                    <button class="btn btn-primary" onclick="modules.generateAccountBalanceReport()">
+                        🔍 Generate Report
+                    </button>
+                </div>
+            </div>
+            <div id="report-content">
+                <div class="text-center">
+                    <p>Select filters and click "Generate Report"</p>
+                </div>
+            </div>
+        `;
+
+        try {
+            // Load filter options
+            const [organizations, currencies] = await Promise.all([
+                api.getOrganizations(),
+                api.getCurrencies()
+            ]);
+
+            const orgFilter = document.getElementById('org-filter');
+            organizations.forEach(org => {
+                const option = document.createElement('option');
+                option.value = org.id;
+                option.textContent = org.name;
+                orgFilter.appendChild(option);
+            });
+
+            const currFilter = document.getElementById('currency-filter');
+            currencies.forEach(curr => {
+                const option = document.createElement('option');
+                option.value = curr.id;
+                option.textContent = `${curr.code} - ${curr.name}`;
+                currFilter.appendChild(option);
+            });
+        } catch (error) {
+            utils.showToast('Error loading filters: ' + error.message, 'error');
         }
     }
 });
