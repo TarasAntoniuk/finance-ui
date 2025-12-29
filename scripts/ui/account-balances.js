@@ -102,7 +102,7 @@ Object.assign(modules, {
                                     <td>${acc.currencyCode}</td>
                                     <td class="text-right"><strong>${utils.formatCurrency(acc.balance, acc.currencySymbol)}</strong></td>
                                     <td>${acc.lastTransactionDate ? utils.formatDate(acc.lastTransactionDate) : '-'}</td>
-                                    <td><span class="badge badge-${acc.status.toLowerCase()}">${modules.translateAccountStatus(acc.status)}</span></td>
+                                    <td><span class="badge badge-${acc.accountStatus.toLowerCase()}">${modules.translateAccountStatus(acc.accountStatus)}</span></td>
                                 </tr>
                             `).join('')}
                         </tbody>
