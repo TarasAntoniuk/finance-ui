@@ -10,14 +10,14 @@ if (typeof modules === 'undefined') {
 // Add Bank Receipts methods
 Object.assign(modules, {
     async 'bank-receipts'() {
-        document.getElementById('module-title').textContent = 'Банківські надходження';
+        document.getElementById('module-title').textContent = 'Bank Receipts';
         const contentBody = document.getElementById('content-body');
 
         contentBody.innerHTML = `
             <div class="action-bar">
                 <div class="action-bar-left">
                     <button class="btn btn-primary" onclick="modules.createBankReceipt()">
-                        ➕ Нове надходження
+                        ➕ New Receipt
                     </button>
                 </div>
             </div>
@@ -25,17 +25,17 @@ Object.assign(modules, {
                 <table>
                     <thead>
                         <tr>
-                            <th>Дата</th>
-                            <th>Тип</th>
-                            <th>Контрагент</th>
-                            <th>Сума</th>
-                            <th>Валюта</th>
-                            <th>Статус</th>
-                            <th>Дії</th>
+                            <th>Date</th>
+                            <th>Type</th>
+                            <th>Counterparty</th>
+                            <th>Amount</th>
+                            <th>Currency</th>
+                            <th>Status</th>
+                            <th>Actions</th>
                         </tr>
                     </thead>
                     <tbody id="receipts-tbody">
-                        <tr><td colspan="7" class="text-center">Завантаження...</td></tr>
+                        <tr><td colspan="7" class="text-center">Loading...</td></tr>
                     </tbody>
                 </table>
             </div>
@@ -47,7 +47,7 @@ Object.assign(modules, {
             const tbody = document.getElementById('receipts-tbody');
 
             if (data.content.length === 0) {
-                tbody.innerHTML = '<tr><td colspan="7" class="text-center">Надходжень не знайдено</td></tr>';
+                tbody.innerHTML = '<tr><td colspan="7" class="text-center">No receipts found</td></tr>';
                 return;
             }
 
@@ -60,14 +60,14 @@ Object.assign(modules, {
                     <td>${receipt.currency?.code || '-'}</td>
                     <td><span class="badge badge-${receipt.status.toLowerCase()}">${modules.translateStatus(receipt.status)}</span></td>
                     <td>
-                        <button class="btn-icon" onclick="modules.viewBankReceipt(${receipt.id})" title="Переглянути">👁️</button>
+                        <button class="btn-icon" onclick="modules.viewBankReceipt(${receipt.id})" title="View">👁️</button>
                         ${receipt.status === 'DRAFT' ? `
-                            <button class="btn-icon" onclick="modules.editBankReceipt(${receipt.id})" title="Редагувати">✏️</button>
-                            <button class="btn-icon" onclick="modules.postBankReceipt(${receipt.id})" title="Провести">✅</button>
-                            <button class="btn-icon" onclick="modules.deleteBankReceipt(${receipt.id})" title="Видалити">🗑️</button>
+                            <button class="btn-icon" onclick="modules.editBankReceipt(${receipt.id})" title="Edit">✏️</button>
+                            <button class="btn-icon" onclick="modules.postBankReceipt(${receipt.id})" title="Post">✅</button>
+                            <button class="btn-icon" onclick="modules.deleteBankReceipt(${receipt.id})" title="Delete">🗑️</button>
                         ` : ''}
                         ${receipt.status === 'POSTED' ? `
-                            <button class="btn-icon" onclick="modules.unpostBankReceipt(${receipt.id})" title="Скасувати проведення">↩️</button>
+                            <button class="btn-icon" onclick="modules.unpostBankReceipt(${receipt.id})" title="Unpost">↩️</button>
                         ` : ''}
                     </td>
                 </tr>
@@ -75,7 +75,7 @@ Object.assign(modules, {
 
             modules.renderPagination('receipts-pagination', data.metadata, () => modules['bank-receipts']());
         } catch (error) {
-            utils.showToast('Помилка завантаження надходжень: ' + error.message, 'error');
+            utils.showToast('Error loading receipts: ' + error.message, 'error');
         }
     },
 
@@ -298,153 +298,153 @@ Object.assign(modules, {
                 <div class="detail-view">
                     <div class="form-row">
                         <div class="form-group">
-                            <label>Дата та час</label>
+                            <label>Date & Time</label>
                             <p>${utils.formatDateTime(receipt.transactionDateTime)}</p>
                         </div>
                         <div class="form-group">
-                            <label>Тип</label>
+                            <label>Type</label>
                             <p>${modules.translateReceiptType(receipt.receiptType)}</p>
                         </div>
                         <div class="form-group">
-                            <label>Статус</label>
+                            <label>Status</label>
                             <p><span class="badge badge-${receipt.status.toLowerCase()}">${modules.translateStatus(receipt.status)}</span></p>
                         </div>
                     </div>
 
                     <div class="form-row">
                         <div class="form-group">
-                            <label>Організація</label>
+                            <label>Organization</label>
                             <p>${receipt.organization?.name || '-'}</p>
                         </div>
                         <div class="form-group">
-                            <label>Рахунок</label>
+                            <label>Account</label>
                             <p>${receipt.account?.accountNumber || '-'}</p>
                         </div>
                     </div>
 
                     <div class="form-row">
                         <div class="form-group">
-                            <label>Контрагент</label>
+                            <label>Counterparty</label>
                             <p>${receipt.counterparty?.name || '-'}</p>
                         </div>
                         <div class="form-group">
-                            <label>Рахунок контрагента</label>
+                            <label>Counterparty Account</label>
                             <p>${receipt.counterpartyBankAccount?.accountNumber || '-'}</p>
                         </div>
                     </div>
 
                     <div class="form-row">
                         <div class="form-group">
-                            <label>Сума</label>
+                            <label>Amount</label>
                             <p><strong>${utils.formatCurrency(receipt.amount, receipt.currency?.symbol)}</strong></p>
                         </div>
                         ${receipt.bankCommission ? `
                         <div class="form-group">
-                            <label>Комісія банку</label>
+                            <label>Bank Commission</label>
                             <p>${utils.formatCurrency(receipt.bankCommission, receipt.currency?.symbol)}</p>
                         </div>
                         ` : ''}
                     </div>
 
                     <div class="form-group">
-                        <label>Призначення платежу</label>
+                        <label>Payment Purpose</label>
                         <p>${receipt.paymentPurpose || '-'}</p>
                     </div>
 
                     ${receipt.description ? `
                     <div class="form-group">
-                        <label>Опис</label>
+                        <label>Description</label>
                         <p>${receipt.description}</p>
                     </div>
                     ` : ''}
 
                     ${receipt.paymentReference ? `
                     <div class="form-group">
-                        <label>Референс платежу</label>
+                        <label>Payment Reference</label>
                         <p>${receipt.paymentReference}</p>
                     </div>
                     ` : ''}
 
                     ${receipt.incomingDocumentNumber ? `
                     <div class="form-group">
-                        <label>Номер вхідного документа</label>
+                        <label>Incoming Document Number</label>
                         <p>${receipt.incomingDocumentNumber}</p>
                     </div>
                     ` : ''}
 
                     ${receipt.valueDate ? `
                     <div class="form-group">
-                        <label>Дата валютування</label>
+                        <label>Value Date</label>
                         <p>${utils.formatDate(receipt.valueDate)}</p>
                     </div>
                     ` : ''}
 
                     ${receipt.externalTransactionId ? `
                     <div class="form-group">
-                        <label>Зовнішній ID транзакції</label>
+                        <label>External Transaction ID</label>
                         <p>${receipt.externalTransactionId}</p>
                     </div>
                     ` : ''}
 
                     ${receipt.bankReference ? `
                     <div class="form-group">
-                        <label>Банківський референс</label>
+                        <label>Bank Reference</label>
                         <p>${receipt.bankReference}</p>
                     </div>
                     ` : ''}
 
                     <div class="form-row">
                         <div class="form-group">
-                            <label>Створено</label>
+                            <label>Created</label>
                             <p>${utils.formatDateTime(receipt.createdAt)}</p>
                         </div>
                         ${receipt.postedAt ? `
                         <div class="form-group">
-                            <label>Проведено</label>
+                            <label>Posted</label>
                             <p>${utils.formatDateTime(receipt.postedAt)}</p>
                         </div>
                         ` : ''}
                     </div>
                 </div>
             `;
-            utils.showModal('Перегляд надходження #' + id, html);
+            utils.showModal('View Receipt #' + id, html);
         } catch (error) {
-            utils.showToast('Помилка завантаження: ' + error.message, 'error');
+            utils.showToast('Error loading: ' + error.message, 'error');
         }
     },
 
     async postBankReceipt(id) {
-        if (await utils.confirm('Провести надходження?')) {
+        if (await utils.confirm('Post receipt?')) {
             try {
                 await api.postBankReceipt(id);
-                utils.showToast('Надходження проведено');
+                utils.showToast('Receipt posted successfully');
                 modules['bank-receipts']();
             } catch (error) {
-                utils.showToast('Помилка: ' + error.message, 'error');
+                utils.showToast('Error: ' + error.message, 'error');
             }
         }
     },
 
     async unpostBankReceipt(id) {
-        if (await utils.confirm('Скасувати проведення?')) {
+        if (await utils.confirm('Unpost receipt?')) {
             try {
                 await api.unpostBankReceipt(id);
-                utils.showToast('Проведення скасовано');
+                utils.showToast('Receipt unposted successfully');
                 modules['bank-receipts']();
             } catch (error) {
-                utils.showToast('Помилка: ' + error.message, 'error');
+                utils.showToast('Error: ' + error.message, 'error');
             }
         }
     },
 
     async deleteBankReceipt(id) {
-        if (await utils.confirm('Видалити надходження?')) {
+        if (await utils.confirm('Delete receipt?')) {
             try {
                 await api.deleteBankReceipt(id);
-                utils.showToast('Надходження видалено');
+                utils.showToast('Receipt deleted successfully');
                 modules['bank-receipts']();
             } catch (error) {
-                utils.showToast('Помилка: ' + error.message, 'error');
+                utils.showToast('Error: ' + error.message, 'error');
             }
         }
     },

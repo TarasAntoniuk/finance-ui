@@ -10,29 +10,29 @@ if (typeof modules === 'undefined') {
 // Add Banks methods
 Object.assign(modules, {
     async banks() {
-        document.getElementById('module-title').textContent = 'Банки';
+        document.getElementById('module-title').textContent = 'Banks';
         const contentBody = document.getElementById('content-body');
 
         contentBody.innerHTML = `
             <div class="action-bar">
                 <button class="btn btn-primary" onclick="modules.createBank()">
-                    ➕ Новий банк
+                    ➕ New Bank
                 </button>
             </div>
             <div class="table-container">
                 <table>
                     <thead>
                         <tr>
-                            <th>Назва</th>
+                            <th>Name</th>
                             <th>SWIFT</th>
-                            <th>Країна</th>
-                            <th>Телефон</th>
-                            <th>Статус</th>
-                            <th>Дії</th>
+                            <th>Country</th>
+                            <th>Phone</th>
+                            <th>Status</th>
+                            <th>Actions</th>
                         </tr>
                     </thead>
                     <tbody id="banks-tbody">
-                        <tr><td colspan="6" class="text-center">Завантаження...</td></tr>
+                        <tr><td colspan="6" class="text-center">Loading...</td></tr>
                     </tbody>
                 </table>
             </div>
@@ -43,7 +43,7 @@ Object.assign(modules, {
             const tbody = document.getElementById('banks-tbody');
 
             if (data.length === 0) {
-                tbody.innerHTML = '<tr><td colspan="6" class="text-center">Банків не знайдено</td></tr>';
+                tbody.innerHTML = '<tr><td colspan="6" class="text-center">No banks found</td></tr>';
                 return;
             }
 
@@ -53,32 +53,32 @@ Object.assign(modules, {
                     <td>${bank.swiftCode}</td>
                     <td>${bank.country?.name || '-'}</td>
                     <td>${bank.phoneNumber || '-'}</td>
-                    <td><span class="badge badge-${bank.isActive ? 'active' : 'inactive'}">${bank.isActive ? 'Активний' : 'Неактивний'}</span></td>
+                    <td><span class="badge badge-${bank.isActive ? 'active' : 'inactive'}">${bank.isActive ? 'Active' : 'Inactive'}</span></td>
                     <td>
-                        <button class="btn-icon" onclick="modules.editBank(${bank.id})" title="Редагувати">✏️</button>
-                        <button class="btn-icon" onclick="modules.deleteBank(${bank.id})" title="Видалити">🗑️</button>
+                        <button class="btn-icon" onclick="modules.editBank(${bank.id})" title="Edit">✏️</button>
+                        <button class="btn-icon" onclick="modules.deleteBank(${bank.id})" title="Delete">🗑️</button>
                     </td>
                 </tr>
             `).join('');
         } catch (error) {
-            utils.showToast('Помилка завантаження банків: ' + error.message, 'error');
+            utils.showToast('Error loading banks: ' + error.message, 'error');
         }
     },
 
     async createBank() {
-        utils.showToast('Форма в розробці', 'warning');
+        utils.showToast('Form under development', 'warning');
     },
     async editBank(id) {
-        utils.showToast('Форма в розробці', 'warning');
+        utils.showToast('Form under development', 'warning');
     },
     async deleteBank(id) {
-        if (await utils.confirm('Видалити банк?')) {
+        if (await utils.confirm('Delete bank?')) {
             try {
                 await api.deleteBank(id);
-                utils.showToast('Банк видалено');
+                utils.showToast('Bank deleted successfully');
                 modules.banks();
             } catch (error) {
-                utils.showToast('Помилка: ' + error.message, 'error');
+                utils.showToast('Error: ' + error.message, 'error');
             }
         }
     }

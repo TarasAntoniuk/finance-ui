@@ -61,11 +61,11 @@ const utils = {
             const content = `
                 <p>${message}</p>
                 <div class="modal-footer">
-                    <button class="btn btn-secondary" onclick="utils.hideModal(); window.confirmResult(false);">Скасувати</button>
-                    <button class="btn btn-danger" onclick="utils.hideModal(); window.confirmResult(true);">Підтвердити</button>
+                    <button class="btn btn-secondary" onclick="utils.hideModal(); window.confirmResult(false);">Cancel</button>
+                    <button class="btn btn-danger" onclick="utils.hideModal(); window.confirmResult(true);">Confirm</button>
                 </div>
             `;
-            utils.showModal('Підтвердження', content);
+            utils.showModal('Confirmation', content);
             window.confirmResult = resolve;
         });
     }

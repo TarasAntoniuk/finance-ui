@@ -10,18 +10,18 @@ if (typeof modules === 'undefined') {
 // Add Reports module
 Object.assign(modules, {
     async reports() {
-        document.getElementById('module-title').textContent = 'Звіти';
+        document.getElementById('module-title').textContent = 'Reports';
         const contentBody = document.getElementById('content-body');
         contentBody.innerHTML = `
             <div class="welcome-screen">
-                <h2>📊 Звіти</h2>
-                <p>Модуль звітів в розробці</p>
-                <p>Доступні звіти:</p>
+                <h2>📊 Reports</h2>
+                <p>Reports module under development</p>
+                <p>Available reports:</p>
                 <ul style="text-align: left; max-width: 400px; margin: 2rem auto;">
-                    <li>Залишки по рахунках</li>
-                    <li>Обороти по рахунках</li>
-                    <li>Аналіз платежів</li>
-                    <li>Аналіз надходжень</li>
+                    <li>Account Balances</li>
+                    <li>Account Turnovers</li>
+                    <li>Payment Analysis</li>
+                    <li>Receipt Analysis</li>
                 </ul>
             </div>
         `;

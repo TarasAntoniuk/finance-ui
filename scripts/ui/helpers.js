@@ -12,56 +12,56 @@ Object.assign(modules, {
     // Helper functions for translations
     translateStatus(status) {
         const translations = {
-            'DRAFT': 'Чернетка',
-            'POSTED': 'Проведено',
-            'CANCELLED': 'Скасовано'
+            'DRAFT': 'Draft',
+            'POSTED': 'Posted',
+            'CANCELLED': 'Cancelled'
         };
         return translations[status] || status;
     },
 
     translatePaymentType(type) {
         const translations = {
-            'SUPPLIER_PAYMENT': 'Оплата постачальнику',
-            'SALARY': 'Зарплата',
-            'TAX_PAYMENT': 'Податковий платіж',
-            'LOAN_REPAYMENT': 'Погашення кредиту',
-            'CONTRACTOR_PAYMENT': 'Оплата підряднику',
-            'UTILITY_PAYMENT': 'Комунальні послуги',
-            'RENT': 'Оренда',
-            'REFUND': 'Повернення',
-            'INTERNAL_TRANSFER': 'Внутрішній переказ',
-            'OTHER': 'Інше'
+            'SUPPLIER_PAYMENT': 'Supplier Payment',
+            'SALARY': 'Salary',
+            'TAX_PAYMENT': 'Tax Payment',
+            'LOAN_REPAYMENT': 'Loan Repayment',
+            'CONTRACTOR_PAYMENT': 'Contractor Payment',
+            'UTILITY_PAYMENT': 'Utility Payment',
+            'RENT': 'Rent',
+            'REFUND': 'Refund',
+            'INTERNAL_TRANSFER': 'Internal Transfer',
+            'OTHER': 'Other'
         };
         return translations[type] || type;
     },
 
     translateReceiptType(type) {
         const translations = {
-            'CUSTOMER_PAYMENT': 'Оплата від клієнта',
-            'LOAN_RECEIVED': 'Отриманий кредит',
-            'INVESTMENT': 'Інвестиція',
-            'REFUND': 'Повернення',
-            'INTEREST_INCOME': 'Відсотковий дохід',
-            'INTERNAL_TRANSFER': 'Внутрішній переказ',
-            'OTHER_INCOME': 'Інший дохід'
+            'CUSTOMER_PAYMENT': 'Customer Payment',
+            'LOAN_RECEIVED': 'Loan Received',
+            'INVESTMENT': 'Investment',
+            'REFUND': 'Refund',
+            'INTEREST_INCOME': 'Interest Income',
+            'INTERNAL_TRANSFER': 'Internal Transfer',
+            'OTHER_INCOME': 'Other Income'
         };
         return translations[type] || type;
     },
 
     translateAccountStatus(status) {
         const translations = {
-            'ACTIVE': 'Активний',
-            'INACTIVE': 'Неактивний',
-            'CLOSED': 'Закритий'
+            'ACTIVE': 'Active',
+            'INACTIVE': 'Inactive',
+            'CLOSED': 'Closed'
         };
         return translations[status] || status;
     },
 
     translateCounterpartyType(type) {
         const translations = {
-            'CUSTOMER': 'Клієнт',
-            'SUPPLIER': 'Постачальник',
-            'BOTH': 'Клієнт та постачальник'
+            'CUSTOMER': 'Customer',
+            'SUPPLIER': 'Supplier',
+            'BOTH': 'Customer and Supplier'
         };
         return translations[type] || type;
     },
@@ -74,11 +74,11 @@ Object.assign(modules, {
 
         container.innerHTML = `
             <button ${!hasPrevious ? 'disabled' : ''} onclick="AppState.currentPage = ${currentPage - 1}; ${onPageChange.toString()}()">
-                ◀ Попередня
+                ◀ Previous
             </button>
-            <span>Сторінка ${currentPage + 1} з ${totalPages}</span>
+            <span>Page ${currentPage + 1} of ${totalPages}</span>
             <button ${!hasNext ? 'disabled' : ''} onclick="AppState.currentPage = ${currentPage + 1}; ${onPageChange.toString()}()">
-                Наступна ▶
+                Next ▶
             </button>
         `;
     }

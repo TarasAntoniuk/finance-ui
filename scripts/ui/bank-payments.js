@@ -316,153 +316,153 @@ Object.assign(modules, {
                 <div class="detail-view">
                     <div class="form-row">
                         <div class="form-group">
-                            <label>Дата та час</label>
+                            <label>Date & Time</label>
                             <p>${utils.formatDateTime(payment.transactionDateTime)}</p>
                         </div>
                         <div class="form-group">
-                            <label>Тип</label>
+                            <label>Type</label>
                             <p>${modules.translatePaymentType(payment.paymentType)}</p>
                         </div>
                         <div class="form-group">
-                            <label>Статус</label>
+                            <label>Status</label>
                             <p><span class="badge badge-${payment.status.toLowerCase()}">${modules.translateStatus(payment.status)}</span></p>
                         </div>
                     </div>
 
                     <div class="form-row">
                         <div class="form-group">
-                            <label>Організація</label>
+                            <label>Organization</label>
                             <p>${payment.organization?.name || '-'}</p>
                         </div>
                         <div class="form-group">
-                            <label>Рахунок</label>
+                            <label>Account</label>
                             <p>${payment.account?.accountNumber || '-'}</p>
                         </div>
                     </div>
 
                     <div class="form-row">
                         <div class="form-group">
-                            <label>Контрагент</label>
+                            <label>Counterparty</label>
                             <p>${payment.counterparty?.name || '-'}</p>
                         </div>
                         <div class="form-group">
-                            <label>Рахунок контрагента</label>
+                            <label>Counterparty Account</label>
                             <p>${payment.counterpartyBankAccount?.accountNumber || '-'}</p>
                         </div>
                     </div>
 
                     <div class="form-row">
                         <div class="form-group">
-                            <label>Сума</label>
+                            <label>Amount</label>
                             <p><strong>${utils.formatCurrency(payment.amount, payment.currency?.symbol)}</strong></p>
                         </div>
                         ${payment.bankCommission ? `
                         <div class="form-group">
-                            <label>Комісія банку</label>
+                            <label>Bank Commission</label>
                             <p>${utils.formatCurrency(payment.bankCommission, payment.currency?.symbol)}</p>
                         </div>
                         ` : ''}
                     </div>
 
                     <div class="form-group">
-                        <label>Призначення платежу</label>
+                        <label>Payment Purpose</label>
                         <p>${payment.paymentPurpose || '-'}</p>
                     </div>
 
                     ${payment.description ? `
                     <div class="form-group">
-                        <label>Опис</label>
+                        <label>Description</label>
                         <p>${payment.description}</p>
                     </div>
                     ` : ''}
 
                     ${payment.paymentReference ? `
                     <div class="form-group">
-                        <label>Референс платежу</label>
+                        <label>Payment Reference</label>
                         <p>${payment.paymentReference}</p>
                     </div>
                     ` : ''}
 
                     ${payment.outgoingDocumentNumber ? `
                     <div class="form-group">
-                        <label>Номер вихідного документа</label>
+                        <label>Outgoing Document Number</label>
                         <p>${payment.outgoingDocumentNumber}</p>
                     </div>
                     ` : ''}
 
                     ${payment.valueDate ? `
                     <div class="form-group">
-                        <label>Дата валютування</label>
+                        <label>Value Date</label>
                         <p>${utils.formatDate(payment.valueDate)}</p>
                     </div>
                     ` : ''}
 
                     ${payment.externalTransactionId ? `
                     <div class="form-group">
-                        <label>Зовнішній ID транзакції</label>
+                        <label>External Transaction ID</label>
                         <p>${payment.externalTransactionId}</p>
                     </div>
                     ` : ''}
 
                     ${payment.bankReference ? `
                     <div class="form-group">
-                        <label>Банківський референс</label>
+                        <label>Bank Reference</label>
                         <p>${payment.bankReference}</p>
                     </div>
                     ` : ''}
 
                     <div class="form-row">
                         <div class="form-group">
-                            <label>Створено</label>
+                            <label>Created</label>
                             <p>${utils.formatDateTime(payment.createdAt)}</p>
                         </div>
                         ${payment.postedAt ? `
                         <div class="form-group">
-                            <label>Проведено</label>
+                            <label>Posted</label>
                             <p>${utils.formatDateTime(payment.postedAt)}</p>
                         </div>
                         ` : ''}
                     </div>
                 </div>
             `;
-            utils.showModal('Перегляд платежу #' + id, html);
+            utils.showModal('View Payment #' + id, html);
         } catch (error) {
-            utils.showToast('Помилка завантаження: ' + error.message, 'error');
+            utils.showToast('Error loading: ' + error.message, 'error');
         }
     },
 
     async postBankPayment(id) {
-        if (await utils.confirm('Провести платіж? Після проведення документ не можна буде редагувати.')) {
+        if (await utils.confirm('Post payment? After posting, the document cannot be edited.')) {
             try {
                 await api.postBankPayment(id);
-                utils.showToast('Платіж успішно проведено');
+                utils.showToast('Payment posted successfully');
                 modules['bank-payments']();
             } catch (error) {
-                utils.showToast('Помилка проведення: ' + error.message, 'error');
+                utils.showToast('Error posting: ' + error.message, 'error');
             }
         }
     },
 
     async unpostBankPayment(id) {
-        if (await utils.confirm('Скасувати проведення платежу?')) {
+        if (await utils.confirm('Unpost payment?')) {
             try {
                 await api.unpostBankPayment(id);
-                utils.showToast('Проведення скасовано');
+                utils.showToast('Payment unposted successfully');
                 modules['bank-payments']();
             } catch (error) {
-                utils.showToast('Помилка: ' + error.message, 'error');
+                utils.showToast('Error: ' + error.message, 'error');
             }
         }
     },
 
     async deleteBankPayment(id) {
-        if (await utils.confirm('Видалити платіж? Цю дію не можна буде скасувати.')) {
+        if (await utils.confirm('Delete payment? This action cannot be undone.')) {
             try {
                 await api.deleteBankPayment(id);
-                utils.showToast('Платіж видалено');
+                utils.showToast('Payment deleted successfully');
                 modules['bank-payments']();
             } catch (error) {
-                utils.showToast('Помилка видалення: ' + error.message, 'error');
+                utils.showToast('Error deleting: ' + error.message, 'error');
             }
         }
     },

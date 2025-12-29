@@ -10,30 +10,30 @@ if (typeof modules === 'undefined') {
 // Add Currencies methods
 Object.assign(modules, {
     async currencies() {
-        document.getElementById('module-title').textContent = 'Валюти';
+        document.getElementById('module-title').textContent = 'Currencies';
         const contentBody = document.getElementById('content-body');
 
         contentBody.innerHTML = `
             <div class="action-bar">
                 <button class="btn btn-primary" onclick="modules.createCurrency()">
-                    ➕ Нова валюта
+                    ➕ New Currency
                 </button>
             </div>
             <div class="table-container">
                 <table>
                     <thead>
                         <tr>
-                            <th>Код</th>
-                            <th>Назва</th>
-                            <th>Символ</th>
-                            <th>Числовий код</th>
-                            <th>Десяткових знаків</th>
-                            <th>Статус</th>
-                            <th>Дії</th>
+                            <th>Code</th>
+                            <th>Name</th>
+                            <th>Symbol</th>
+                            <th>Numeric Code</th>
+                            <th>Decimal Places</th>
+                            <th>Status</th>
+                            <th>Actions</th>
                         </tr>
                     </thead>
                     <tbody id="currencies-tbody">
-                        <tr><td colspan="7" class="text-center">Завантаження...</td></tr>
+                        <tr><td colspan="7" class="text-center">Loading...</td></tr>
                     </tbody>
                 </table>
             </div>
@@ -44,7 +44,7 @@ Object.assign(modules, {
             const tbody = document.getElementById('currencies-tbody');
 
             if (data.length === 0) {
-                tbody.innerHTML = '<tr><td colspan="7" class="text-center">Валют не знайдено</td></tr>';
+                tbody.innerHTML = '<tr><td colspan="7" class="text-center">No currencies found</td></tr>';
                 return;
             }
 
@@ -55,32 +55,32 @@ Object.assign(modules, {
                     <td>${curr.symbol || '-'}</td>
                     <td>${curr.numericCode}</td>
                     <td>${curr.minorUnit}</td>
-                    <td><span class="badge badge-${curr.isActive ? 'active' : 'inactive'}">${curr.isActive ? 'Активна' : 'Неактивна'}</span></td>
+                    <td><span class="badge badge-${curr.isActive ? 'active' : 'inactive'}">${curr.isActive ? 'Active' : 'Inactive'}</span></td>
                     <td>
-                        <button class="btn-icon" onclick="modules.editCurrency(${curr.id})" title="Редагувати">✏️</button>
-                        <button class="btn-icon" onclick="modules.deleteCurrency(${curr.id})" title="Видалити">🗑️</button>
+                        <button class="btn-icon" onclick="modules.editCurrency(${curr.id})" title="Edit">✏️</button>
+                        <button class="btn-icon" onclick="modules.deleteCurrency(${curr.id})" title="Delete">🗑️</button>
                     </td>
                 </tr>
             `).join('');
         } catch (error) {
-            utils.showToast('Помилка завантаження валют: ' + error.message, 'error');
+            utils.showToast('Error loading currencies: ' + error.message, 'error');
         }
     },
 
     async createCurrency() {
-        utils.showToast('Форма в розробці', 'warning');
+        utils.showToast('Form under development', 'warning');
     },
     async editCurrency(id) {
-        utils.showToast('Форма в розробці', 'warning');
+        utils.showToast('Form under development', 'warning');
     },
     async deleteCurrency(id) {
-        if (await utils.confirm('Видалити валюту?')) {
+        if (await utils.confirm('Delete currency?')) {
             try {
                 await api.deleteCurrency(id);
-                utils.showToast('Валюту видалено');
+                utils.showToast('Currency deleted successfully');
                 modules.currencies();
             } catch (error) {
-                utils.showToast('Помилка: ' + error.message, 'error');
+                utils.showToast('Error: ' + error.message, 'error');
             }
         }
     }

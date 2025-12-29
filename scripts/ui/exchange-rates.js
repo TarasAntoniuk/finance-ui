@@ -10,6 +10,6 @@ if (typeof modules === 'undefined') {
 // Add Exchange Rates module
 Object.assign(modules, {
     async 'exchange-rates'() {
-        utils.showToast('Модуль в розробці', 'warning');
+        utils.showToast('Module under development', 'warning');
     }
 });
