@@ -51,6 +51,9 @@ async function initApp() {
                 document.querySelectorAll('.nav-item').forEach(nav => nav.classList.remove('active'));
                 e.currentTarget.classList.add('active');
 
+                // Expand parent group of clicked item
+                expandActiveModuleGroup();
+
                 // Load module
                 AppState.currentModule = module;
                 modules[module]();
@@ -75,65 +78,106 @@ async function initApp() {
 }
 
 /**
- * Setup collapsible navigation groups
+ * Setup collapsible navigation groups with accordion behavior
  */
 function setupNavigationGroups() {
     const groupHeaders = document.querySelectorAll('.nav-group-header');
     const subgroupHeaders = document.querySelectorAll('.nav-subgroup-header');
 
-    // Load saved group states from localStorage
-    const savedStates = JSON.parse(localStorage.getItem('navGroupStates') || '{}');
-
-    // Setup main groups
+    // Collapse all groups by default
     groupHeaders.forEach(header => {
         const groupName = header.dataset.group;
         const groupContent = document.querySelector(`[data-group-content="${groupName}"]`);
+        header.classList.add('collapsed');
+        groupContent.classList.add('collapsed');
+    });
 
-        // Default to collapsed if no saved state exists
-        const shouldBeExpanded = savedStates[groupName] === true;
+    // Collapse all subgroups by default
+    subgroupHeaders.forEach(header => {
+        const subgroupName = header.dataset.subgroup;
+        const subgroupContent = document.querySelector(`[data-subgroup-content="${subgroupName}"]`);
+        header.classList.add('collapsed');
+        subgroupContent.classList.add('collapsed');
+    });
 
-        if (!shouldBeExpanded) {
-            header.classList.add('collapsed');
-            groupContent.classList.add('collapsed');
-        }
+    // Setup main groups with accordion behavior
+    groupHeaders.forEach(header => {
+        const groupName = header.dataset.group;
+        const groupContent = document.querySelector(`[data-group-content="${groupName}"]`);
 
         // Add click handler
         header.addEventListener('click', () => {
             const isCurrentlyCollapsed = header.classList.contains('collapsed');
 
-            header.classList.toggle('collapsed');
-            groupContent.classList.toggle('collapsed');
+            // Collapse all other groups (accordion behavior)
+            groupHeaders.forEach(otherHeader => {
+                if (otherHeader !== header) {
+                    const otherGroupName = otherHeader.dataset.group;
+                    const otherGroupContent = document.querySelector(`[data-group-content="${otherGroupName}"]`);
+                    otherHeader.classList.add('collapsed');
+                    otherGroupContent.classList.add('collapsed');
+                }
+            });
 
-            savedStates[groupName] = isCurrentlyCollapsed;
-            localStorage.setItem('navGroupStates', JSON.stringify(savedStates));
+            // Toggle current group
+            if (isCurrentlyCollapsed) {
+                header.classList.remove('collapsed');
+                groupContent.classList.remove('collapsed');
+            } else {
+                header.classList.add('collapsed');
+                groupContent.classList.add('collapsed');
+            }
         });
     });
 
-    // Setup subgroups
+    // Setup subgroups (they don't affect parent groups)
     subgroupHeaders.forEach(header => {
         const subgroupName = header.dataset.subgroup;
         const subgroupContent = document.querySelector(`[data-subgroup-content="${subgroupName}"]`);
 
-        // Default to collapsed if no saved state exists
-        const shouldBeExpanded = savedStates[`sub_${subgroupName}`] === true;
-
-        if (!shouldBeExpanded) {
-            header.classList.add('collapsed');
-            subgroupContent.classList.add('collapsed');
-        }
-
         // Add click handler
         header.addEventListener('click', (e) => {
             e.stopPropagation(); // Prevent parent group from toggling
-            const isCurrentlyCollapsed = header.classList.contains('collapsed');
 
             header.classList.toggle('collapsed');
             subgroupContent.classList.toggle('collapsed');
-
-            savedStates[`sub_${subgroupName}`] = isCurrentlyCollapsed;
-            localStorage.setItem('navGroupStates', JSON.stringify(savedStates));
         });
     });
+
+    // Auto-expand parent group of active module
+    expandActiveModuleGroup();
+}
+
+/**
+ * Expand the parent group of the currently active module
+ */
+function expandActiveModuleGroup() {
+    const activeItem = document.querySelector('.nav-item.active');
+    if (!activeItem) return;
+
+    // Find parent group
+    const parentGroupContent = activeItem.closest('[data-group-content]');
+    if (parentGroupContent) {
+        const groupName = parentGroupContent.dataset.groupContent;
+        const groupHeader = document.querySelector(`[data-group="${groupName}"]`);
+
+        if (groupHeader && groupHeader.classList.contains('collapsed')) {
+            groupHeader.classList.remove('collapsed');
+            parentGroupContent.classList.remove('collapsed');
+        }
+    }
+
+    // Also check for subgroup
+    const parentSubgroupContent = activeItem.closest('[data-subgroup-content]');
+    if (parentSubgroupContent) {
+        const subgroupName = parentSubgroupContent.dataset.subgroupContent;
+        const subgroupHeader = document.querySelector(`[data-subgroup="${subgroupName}"]`);
+
+        if (subgroupHeader && subgroupHeader.classList.contains('collapsed')) {
+            subgroupHeader.classList.remove('collapsed');
+            parentSubgroupContent.classList.remove('collapsed');
+        }
+    }
 }
 
 /**

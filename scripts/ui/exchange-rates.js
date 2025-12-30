@@ -26,17 +26,6 @@ Object.assign(modules, {
 
         contentBody.innerHTML = `
             <div class="action-bar">
-                <div class="action-bar-left">
-                    <button class="btn btn-primary" onclick="modules.createExchangeRate()">
-                        ➕ New Exchange Rate
-                    </button>
-                    <button class="btn btn-secondary" onclick="modules.syncECBDaily()">
-                        🔄 Sync Daily Rates
-                    </button>
-                    <button class="btn btn-secondary" onclick="modules.syncECBHistory()">
-                        📥 Sync Historical Rates
-                    </button>
-                </div>
                 <div class="action-bar-right">
                     <input type="date" id="rate-date-filter" value="${today}">
                     <button class="btn btn-primary" onclick="modules.filterByDate()">
@@ -414,32 +403,6 @@ Object.assign(modules, {
                 modules.loadAllExchangeRates(exchangeRateState.currentPage);
             } catch (error) {
                 utils.showToast('Deactivation error: ' + error.message, 'error');
-            }
-        }
-    },
-
-    async syncECBDaily() {
-        if (await utils.confirm('Sync daily ECB exchange rates? This will fetch the latest rates from European Central Bank.')) {
-            try {
-                utils.showToast('Syncing daily rates...', 'info');
-                const result = await api.syncECBDaily();
-                utils.showToast('Daily rates synced successfully');
-                modules['exchange-rates']();
-            } catch (error) {
-                utils.showToast('Sync error: ' + error.message, 'error');
-            }
-        }
-    },
-
-    async syncECBHistory() {
-        if (await utils.confirm('Sync historical ECB exchange rates? This may take several minutes and will fetch all available historical data.')) {
-            try {
-                utils.showToast('Syncing historical rates... This may take a while.', 'info');
-                const result = await api.syncECBHistory();
-                utils.showToast('Historical rates synced successfully');
-                modules['exchange-rates']();
-            } catch (error) {
-                utils.showToast('Sync error: ' + error.message, 'error');
             }
         }
     }
