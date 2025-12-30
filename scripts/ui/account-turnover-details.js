@@ -9,6 +9,17 @@ if (typeof modules === 'undefined') {
 
 // Add Account Turnover Details module
 Object.assign(modules, {
+    viewDocumentFromTurnover(documentId, documentType) {
+        // Open the appropriate document based on type
+        if (documentType === 'BankPayment') {
+            modules.viewBankPayment(documentId);
+        } else if (documentType === 'BankReceipt') {
+            modules.viewBankReceipt(documentId);
+        } else {
+            utils.showToast('Unknown document type: ' + documentType, 'error');
+        }
+    },
+
     async 'account-turnover-details'(accountId, startDate, endDate, organizationId) {
         document.getElementById('module-title').textContent = 'Account Turnover Details';
         const contentBody = document.getElementById('content-body');
@@ -129,7 +140,7 @@ Object.assign(modules, {
                                             return `
                                                 <tr>
                                                     <td>${utils.formatDateTime(movement.documentDate)}</td>
-                                                    <td><a href="#" onclick="event.preventDefault(); utils.showToast('Document view not implemented', 'info');">#${movement.documentId}</a></td>
+                                                    <td><a href="#" onclick="event.preventDefault(); modules.viewDocumentFromTurnover(${movement.documentId}, '${movement.documentType}');">#${movement.documentId}</a></td>
                                                     <td>${docTypeBadge}</td>
                                                     <td>${description}</td>
                                                     <td class="text-right">${debitDisplay}</td>
