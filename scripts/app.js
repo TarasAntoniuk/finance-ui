@@ -12,9 +12,31 @@ const AppState = {
 };
 
 /**
+ * Renders the API endpoint indicator
+ * Shows which API endpoint is currently active with environment indicator
+ */
+function renderEndpointIndicator() {
+    const indicator = document.getElementById('api-endpoint-indicator')
+    if (!indicator) return
+
+    const info = api.getConnectionInfo()
+    const icon = info.isProduction ? '🟢' : '🟡'
+    const environmentClass = info.isProduction ? 'production' : 'local'
+
+    indicator.innerHTML = `
+        <span class="endpoint-icon">${icon}</span>
+        <span>${info.baseUrl}</span>
+    `
+    indicator.className = `api-endpoint-indicator ${environmentClass}`
+}
+
+/**
  * Initialize the application
  */
 async function initApp() {
+    // Render endpoint indicator
+    renderEndpointIndicator()
+
     // Check API connection
     const statusDot = document.getElementById('api-status-dot');
     const statusText = document.getElementById('api-status-text');

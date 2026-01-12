@@ -338,6 +338,35 @@ body {
     50% { opacity: 0.5; }
 }
 
+/* API Endpoint Indicator */
+.api-endpoint-indicator {
+    display: inline-flex;
+    align-items: center;
+    padding: 6px 12px;
+    border-radius: var(--radius-md);
+    font-size: 12px;
+    font-family: 'Courier New', monospace;
+    font-weight: 500;
+    white-space: nowrap;
+}
+
+.api-endpoint-indicator.production {
+    background: #d4edda;
+    border: 1px solid #28a745;
+    color: #155724;
+}
+
+.api-endpoint-indicator.local {
+    background: #fff3cd;
+    border: 1px solid #ffc107;
+    color: #856404;
+}
+
+.api-endpoint-indicator .endpoint-icon {
+    margin-right: 6px;
+    font-size: 14px;
+}
+
 .content-body {
     background: var(--bg-secondary);
     border-radius: var(--radius-lg);

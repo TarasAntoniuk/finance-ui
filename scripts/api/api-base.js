@@ -1,11 +1,59 @@
-// API Configuration
-// const API_BASE_URL = 'https://api.tarasantoniuk.com';
-const API_BASE_URL = 'http://localhost:8080'; // For local development
+/**
+ * Detects current environment based on hostname
+ * @returns {string} 'local' or 'production'
+ */
+function detectEnvironment() {
+    const hostname = window.location.hostname
+
+    if (hostname === 'localhost' || hostname === '127.0.0.1') {
+        return 'local'
+    }
+
+    // Any other domain is considered production
+    return 'production'
+}
+
+/**
+ * Gets API base URL based on environment
+ * @param {string} environment - 'local' or 'production'
+ * @returns {string} API base URL
+ */
+function getApiBaseUrl(environment) {
+    switch (environment) {
+        case 'local':
+            return 'http://localhost:8080'
+        case 'production':
+            return 'https://api.tarasantoniuk.com'
+        default:
+            return 'https://api.tarasantoniuk.com'
+    }
+}
+
+// API Configuration - Automatically detect environment
+const CURRENT_ENVIRONMENT = detectEnvironment()
+const API_BASE_URL = getApiBaseUrl(CURRENT_ENVIRONMENT)
+
+console.log(`🔧 API Configuration: ${CURRENT_ENVIRONMENT} environment - ${API_BASE_URL}`)
 
 // API Client
 class FinanceAPI {
     constructor(baseUrl) {
-        this.baseUrl = baseUrl;
+        this.baseUrl = baseUrl
+        this.environment = CURRENT_ENVIRONMENT
+    }
+
+    /**
+     * Gets connection information for display purposes
+     * @returns {Object} Connection info with environment, baseUrl, hostname
+     */
+    getConnectionInfo() {
+        return {
+            environment: this.environment,
+            baseUrl: this.baseUrl,
+            hostname: window.location.hostname,
+            protocol: window.location.protocol,
+            isProduction: this.environment === 'production'
+        }
     }
 
     async request(endpoint, options = {}) {
