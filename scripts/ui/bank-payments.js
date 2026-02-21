@@ -16,9 +16,9 @@ Object.assign(modules, {
         contentBody.innerHTML = `
             <div class="action-bar">
                 <div class="action-bar-left">
-                    <button class="btn btn-primary" onclick="modules.createBankPayment()">
+                    ${auth.canWrite() ? `<button class="btn btn-primary" onclick="modules.createBankPayment()">
                         ➕ New Payment
-                    </button>
+                    </button>` : ''}
                 </div>
                 <div class="action-bar-right">
                     <select id="status-filter" onchange="modules['bank-payments']()">
@@ -76,12 +76,12 @@ Object.assign(modules, {
                     <td><span class="badge badge-${payment.status.toLowerCase()}">${modules.translateStatus(payment.status)}</span></td>
                     <td>
                         <button class="btn-icon" onclick="modules.viewBankPayment(${payment.id})" title="View">👁️</button>
-                        ${payment.status === 'DRAFT' ? `
+                        ${payment.status === 'DRAFT' && auth.canWrite() ? `
                             <button class="btn-icon" onclick="modules.editBankPayment(${payment.id})" title="Edit">✏️</button>
                             <button class="btn-icon" onclick="modules.postBankPayment(${payment.id})" title="Post">✅</button>
                             <button class="btn-icon" onclick="modules.deleteBankPayment(${payment.id})" title="Delete">🗑️</button>
                         ` : ''}
-                        ${payment.status === 'POSTED' ? `
+                        ${payment.status === 'POSTED' && auth.canWrite() ? `
                             <button class="btn-icon" onclick="modules.unpostBankPayment(${payment.id})" title="Unpost">↩️</button>
                         ` : ''}
                     </td>

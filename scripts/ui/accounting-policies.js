@@ -27,9 +27,9 @@ Object.assign(modules, {
         contentBody.innerHTML = `
             <div class="action-bar">
                 <div class="action-bar-left">
-                    <button class="btn btn-primary" onclick="modules.createAccountingPolicy()">
+                    ${auth.canWrite() ? `<button class="btn btn-primary" onclick="modules.createAccountingPolicy()">
                         ➕ New Accounting Policy
-                    </button>
+                    </button>` : ''}
                 </div>
                 <div class="action-bar-right">
                     <select id="policy-org-filter" onchange="modules.filterAccountingPolicies()">
@@ -157,9 +157,11 @@ Object.assign(modules, {
                     <td>${statusBadge}</td>
                     <td>
                         <button class="btn-icon" onclick="modules.viewAccountingPolicy(${policy.id})" title="View">👁️</button>
-                        <button class="btn-icon" onclick="modules.editAccountingPolicy(${policy.id})" title="Edit">✏️</button>
-                        ${toggleAction}
-                        <button class="btn-icon" onclick="modules.deleteAccountingPolicy(${policy.id})" title="Delete">🗑️</button>
+                        ${auth.canWrite() ? `
+                            <button class="btn-icon" onclick="modules.editAccountingPolicy(${policy.id})" title="Edit">✏️</button>
+                            ${toggleAction}
+                            <button class="btn-icon" onclick="modules.deleteAccountingPolicy(${policy.id})" title="Delete">🗑️</button>
+                        ` : ''}
                     </td>
                 </tr>
             `;
@@ -394,7 +396,7 @@ Object.assign(modules, {
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" onclick="utils.hideModal()">Close</button>
-                    <button type="button" class="btn btn-primary" onclick="utils.hideModal(); modules.editAccountingPolicy(${id})">Edit</button>
+                    ${auth.canWrite() ? `<button type="button" class="btn btn-primary" onclick="utils.hideModal(); modules.editAccountingPolicy(${id})">Edit</button>` : ''}
                 </div>
             `;
 

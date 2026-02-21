@@ -16,9 +16,9 @@ Object.assign(modules, {
         contentBody.innerHTML = `
             <div class="action-bar">
                 <div class="action-bar-left">
-                    <button class="btn btn-primary" onclick="modules.createBankReceipt()">
+                    ${auth.canWrite() ? `<button class="btn btn-primary" onclick="modules.createBankReceipt()">
                         ➕ New Receipt
-                    </button>
+                    </button>` : ''}
                 </div>
             </div>
             <div class="table-container">
@@ -61,12 +61,12 @@ Object.assign(modules, {
                     <td><span class="badge badge-${receipt.status.toLowerCase()}">${modules.translateStatus(receipt.status)}</span></td>
                     <td>
                         <button class="btn-icon" onclick="modules.viewBankReceipt(${receipt.id})" title="View">👁️</button>
-                        ${receipt.status === 'DRAFT' ? `
+                        ${receipt.status === 'DRAFT' && auth.canWrite() ? `
                             <button class="btn-icon" onclick="modules.editBankReceipt(${receipt.id})" title="Edit">✏️</button>
                             <button class="btn-icon" onclick="modules.postBankReceipt(${receipt.id})" title="Post">✅</button>
                             <button class="btn-icon" onclick="modules.deleteBankReceipt(${receipt.id})" title="Delete">🗑️</button>
                         ` : ''}
-                        ${receipt.status === 'POSTED' ? `
+                        ${receipt.status === 'POSTED' && auth.canWrite() ? `
                             <button class="btn-icon" onclick="modules.unpostBankReceipt(${receipt.id})" title="Unpost">↩️</button>
                         ` : ''}
                     </td>

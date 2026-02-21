@@ -15,9 +15,9 @@ Object.assign(modules, {
 
         contentBody.innerHTML = `
             <div class="action-bar">
-                <button class="btn btn-primary" onclick="modules.createCounterparty()">
+                ${auth.canWrite() ? `<button class="btn btn-primary" onclick="modules.createCounterparty()">
                     ➕ New Counterparty
-                </button>
+                </button>` : ''}
             </div>
             <div class="table-container">
                 <table>
@@ -59,8 +59,10 @@ Object.assign(modules, {
                     <td><span class="badge badge-${cp.isActive ? 'active' : 'inactive'}">${cp.isActive ? 'Active' : 'Inactive'}</span></td>
                     <td>
                         <button class="btn-icon" onclick="modules.viewCounterparty(${cp.id})" title="View">👁️</button>
-                        <button class="btn-icon" onclick="modules.editCounterparty(${cp.id})" title="Edit">✏️</button>
-                        <button class="btn-icon" onclick="modules.deleteCounterparty(${cp.id})" title="Delete">🗑️</button>
+                        ${auth.canWrite() ? `
+                            <button class="btn-icon" onclick="modules.editCounterparty(${cp.id})" title="Edit">✏️</button>
+                            <button class="btn-icon" onclick="modules.deleteCounterparty(${cp.id})" title="Delete">🗑️</button>
+                        ` : ''}
                     </td>
                 </tr>
             `).join('');
@@ -345,7 +347,7 @@ Object.assign(modules, {
                     <div class="modal-footer">
                         <button class="btn btn-secondary" onclick="utils.hideModal()">Close</button>
                         <button class="btn btn-success" onclick="utils.hideModal(); modules.manageCounterpartyBankAccounts(${id}, '${counterparty.name}')">Bank Accounts</button>
-                        <button class="btn btn-primary" onclick="utils.hideModal(); modules.editCounterparty(${id})">Edit</button>
+                        ${auth.canWrite() ? `<button class="btn btn-primary" onclick="utils.hideModal(); modules.editCounterparty(${id})">Edit</button>` : ''}
                     </div>
                 </div>
             `;
@@ -376,9 +378,9 @@ Object.assign(modules, {
                 <div>
                     <p><strong>Counterparty:</strong> ${counterpartyName}</p>
                     <div class="action-bar mt-2">
-                        <button class="btn btn-primary" onclick="modules.createCounterpartyBankAccount(${counterpartyId})">
+                        ${auth.canWrite() ? `<button class="btn btn-primary" onclick="modules.createCounterpartyBankAccount(${counterpartyId})">
                             ➕ Add Bank Account
-                        </button>
+                        </button>` : ''}
                     </div>
                     <div class="table-container mt-2">
                         <table>
@@ -403,8 +405,10 @@ Object.assign(modules, {
                                             <td><span class="badge badge-${acc.status.toLowerCase()}">${acc.status}</span></td>
                                             <td>${acc.isDefault ? '⭐' : ''}</td>
                                             <td>
-                                                <button class="btn-icon" onclick="modules.editCounterpartyBankAccount(${acc.id}, ${counterpartyId})" title="Edit">✏️</button>
-                                                <button class="btn-icon" onclick="modules.deleteCounterpartyBankAccount(${acc.id}, ${counterpartyId}, '${counterpartyName}')" title="Delete">🗑️</button>
+                                                ${auth.canWrite() ? `
+                                                    <button class="btn-icon" onclick="modules.editCounterpartyBankAccount(${acc.id}, ${counterpartyId})" title="Edit">✏️</button>
+                                                    <button class="btn-icon" onclick="modules.deleteCounterpartyBankAccount(${acc.id}, ${counterpartyId}, '${counterpartyName}')" title="Delete">🗑️</button>
+                                                ` : ''}
                                             </td>
                                         </tr>
                                     `).join('')

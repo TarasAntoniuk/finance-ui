@@ -15,9 +15,9 @@ Object.assign(modules, {
 
         contentBody.innerHTML = `
             <div class="action-bar">
-                <button class="btn btn-primary" onclick="modules.createCurrency()">
+                ${auth.canWrite() ? `<button class="btn btn-primary" onclick="modules.createCurrency()">
                     ➕ New Currency
-                </button>
+                </button>` : ''}
             </div>
             <div class="table-container">
                 <table>
@@ -57,8 +57,10 @@ Object.assign(modules, {
                     <td>${curr.minorUnit}</td>
                     <td><span class="badge badge-${curr.isActive ? 'active' : 'inactive'}">${curr.isActive ? 'Active' : 'Inactive'}</span></td>
                     <td>
-                        <button class="btn-icon" onclick="modules.editCurrency(${curr.id})" title="Edit">✏️</button>
-                        <button class="btn-icon" onclick="modules.deleteCurrency(${curr.id})" title="Delete">🗑️</button>
+                        ${auth.canWrite() ? `
+                            <button class="btn-icon" onclick="modules.editCurrency(${curr.id})" title="Edit">✏️</button>
+                            <button class="btn-icon" onclick="modules.deleteCurrency(${curr.id})" title="Delete">🗑️</button>
+                        ` : ''}
                     </td>
                 </tr>
             `).join('');

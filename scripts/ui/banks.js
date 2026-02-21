@@ -15,9 +15,9 @@ Object.assign(modules, {
 
         contentBody.innerHTML = `
             <div class="action-bar">
-                <button class="btn btn-primary" onclick="modules.createBank()">
+                ${auth.canWrite() ? `<button class="btn btn-primary" onclick="modules.createBank()">
                     ➕ New Bank
-                </button>
+                </button>` : ''}
             </div>
             <div class="table-container">
                 <table>
@@ -55,8 +55,10 @@ Object.assign(modules, {
                     <td>${bank.phoneNumber || '-'}</td>
                     <td><span class="badge badge-${bank.isActive ? 'active' : 'inactive'}">${bank.isActive ? 'Active' : 'Inactive'}</span></td>
                     <td>
-                        <button class="btn-icon" onclick="modules.editBank(${bank.id})" title="Edit">✏️</button>
-                        <button class="btn-icon" onclick="modules.deleteBank(${bank.id})" title="Delete">🗑️</button>
+                        ${auth.canWrite() ? `
+                            <button class="btn-icon" onclick="modules.editBank(${bank.id})" title="Edit">✏️</button>
+                            <button class="btn-icon" onclick="modules.deleteBank(${bank.id})" title="Delete">🗑️</button>
+                        ` : ''}
                     </td>
                 </tr>
             `).join('');

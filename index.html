@@ -9,12 +9,60 @@
     <link rel="stylesheet" href="styles/responsive.css">
 </head>
 <body>
-<div class="app-container">
+
+<!-- Login Page -->
+<div class="login-page" id="login-page">
+    <div class="login-container">
+        <div class="login-header">
+            <h1>Finance</h1>
+            <p>Accounting System</p>
+        </div>
+        <div class="login-form-container">
+            <div class="login-tabs">
+                <button class="login-tab active" id="login-tab" onclick="switchAuthTab('login')">Login</button>
+                <button class="login-tab" id="register-tab" onclick="switchAuthTab('register')">Register</button>
+            </div>
+            <form id="login-form" onsubmit="handleLogin(event)">
+                <div class="form-group">
+                    <label for="login-email">Email</label>
+                    <input type="email" id="login-email" required placeholder="user@example.com" autocomplete="email">
+                </div>
+                <div class="form-group">
+                    <label for="login-password">Password</label>
+                    <input type="password" id="login-password" required placeholder="Enter password" autocomplete="current-password">
+                </div>
+                <div class="login-error" id="login-error"></div>
+                <button type="submit" class="btn btn-primary login-btn" id="login-submit-btn">Login</button>
+            </form>
+            <form id="register-form" class="hidden" onsubmit="handleRegister(event)">
+                <div class="form-group">
+                    <label for="register-email">Email</label>
+                    <input type="email" id="register-email" required placeholder="user@example.com" autocomplete="email">
+                </div>
+                <div class="form-group">
+                    <label for="register-password">Password</label>
+                    <input type="password" id="register-password" required minlength="8" maxlength="100" placeholder="Minimum 8 characters" autocomplete="new-password">
+                </div>
+                <div class="login-error" id="register-error"></div>
+                <button type="submit" class="btn btn-primary login-btn" id="register-submit-btn">Register</button>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Main Application (hidden until authenticated) -->
+<div class="app-container hidden" id="app-container">
     <!-- Sidebar Navigation -->
     <aside class="sidebar">
         <div class="logo">
             <h1>Finance</h1>
             <p>Accounting System</p>
+        </div>
+
+        <!-- User Info -->
+        <div class="user-info" id="user-info">
+            <div class="user-email" id="user-email"></div>
+            <div class="user-role" id="user-role-badge"></div>
         </div>
 
         <nav class="nav-menu">
@@ -131,7 +179,29 @@
                     </button>
                 </div>
             </div>
+
+            <!-- Admin Group (visible only for ADMIN) -->
+            <div class="nav-group admin-only" id="admin-nav-group">
+                <button class="nav-group-header" data-group="admin">
+                    <span class="group-icon">🔧</span>
+                    <span class="group-title">Administration</span>
+                    <span class="group-arrow">▼</span>
+                </button>
+                <div class="nav-group-items" data-group-content="admin">
+                    <button class="nav-item" data-module="ecb-sync">
+                        <span class="icon">🏦</span>
+                        ECB Rate Sync
+                    </button>
+                </div>
+            </div>
         </nav>
+
+        <!-- Logout -->
+        <div class="sidebar-footer">
+            <button class="btn btn-secondary logout-btn" onclick="handleLogout()">
+                Logout
+            </button>
+        </div>
     </aside>
 
     <!-- Main Content Area -->
@@ -174,7 +244,7 @@
             </div>
         </div>
     </main>
-</div>
+</div> <!-- /app-container -->
 
 <!-- Modal Template -->
 <div class="modal" id="modal">
@@ -196,6 +266,9 @@
 <!-- Utils -->
 <script src="scripts/utils.js"></script>
 
+<!-- Auth -->
+<script src="scripts/auth.js"></script>
+
 <!-- API Base -->
 <script src="scripts/api/api-base.js"></script>
 
@@ -211,6 +284,7 @@
 <script src="scripts/api/exchange-rates.js"></script>
 <script src="scripts/api/accounting-policies.js"></script>
 <script src="scripts/api/reports.js"></script>
+<script src="scripts/api/admin.js"></script>
 
 <!-- API Init -->
 <script src="scripts/api/init.js"></script>
@@ -233,6 +307,7 @@
 <script src="scripts/ui/account-turnovers.js"></script>
 <script src="scripts/ui/account-turnover-details.js"></script>
 <script src="scripts/ui/reports.js"></script>
+<script src="scripts/ui/admin.js"></script>
 
 <!-- App Init -->
 <script src="scripts/app.js"></script>

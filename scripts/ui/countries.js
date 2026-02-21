@@ -15,9 +15,9 @@ Object.assign(modules, {
 
         contentBody.innerHTML = `
             <div class="action-bar">
-                <button class="btn btn-primary" onclick="modules.createCountry()">
+                ${auth.canWrite() ? `<button class="btn btn-primary" onclick="modules.createCountry()">
                     ➕ New Country
-                </button>
+                </button>` : ''}
             </div>
             <div class="table-container">
                 <table>
@@ -53,8 +53,10 @@ Object.assign(modules, {
                     <td>${country.phoneCode || '-'}</td>
                     <td>${country.currency?.code || '-'}</td>
                     <td>
-                        <button class="btn-icon" onclick="modules.editCountry(${country.id})" title="Edit">✏️</button>
-                        <button class="btn-icon" onclick="modules.deleteCountry(${country.id})" title="Delete">🗑️</button>
+                        ${auth.canWrite() ? `
+                            <button class="btn-icon" onclick="modules.editCountry(${country.id})" title="Edit">✏️</button>
+                            <button class="btn-icon" onclick="modules.deleteCountry(${country.id})" title="Delete">🗑️</button>
+                        ` : ''}
                     </td>
                 </tr>
             `).join('');

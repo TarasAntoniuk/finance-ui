@@ -127,9 +127,11 @@ Object.assign(modules, {
                     <td>${statusBadge}</td>
                     <td>
                         <button class="btn-icon" onclick="modules.viewExchangeRate(${rate.id})" title="View">👁️</button>
-                        <button class="btn-icon" onclick="modules.editExchangeRate(${rate.id})" title="Edit">✏️</button>
-                        ${toggleAction}
-                        <button class="btn-icon" onclick="modules.deleteExchangeRate(${rate.id})" title="Delete">🗑️</button>
+                        ${auth.canWrite() ? `
+                            <button class="btn-icon" onclick="modules.editExchangeRate(${rate.id})" title="Edit">✏️</button>
+                            ${toggleAction}
+                            <button class="btn-icon" onclick="modules.deleteExchangeRate(${rate.id})" title="Delete">🗑️</button>
+                        ` : ''}
                     </td>
                 </tr>
             `;
@@ -322,7 +324,7 @@ Object.assign(modules, {
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" onclick="utils.hideModal()">Close</button>
-                    <button type="button" class="btn btn-primary" onclick="utils.hideModal(); modules.editExchangeRate(${id})">Edit</button>
+                    ${auth.canWrite() ? `<button type="button" class="btn btn-primary" onclick="utils.hideModal(); modules.editExchangeRate(${id})">Edit</button>` : ''}
                 </div>
             `;
 

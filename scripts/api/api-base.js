@@ -56,33 +56,81 @@ class FinanceAPI {
         }
     }
 
-    async request(endpoint, options = {}) {
-        const url = `${this.baseUrl}${endpoint}`;
+    /**
+     * Check if an endpoint is a public auth endpoint (no token needed)
+     */
+    _isAuthEndpoint(endpoint) {
+        return endpoint.startsWith('/api/auth/')
+    }
+
+    async request(endpoint, options = {}, _isRetry = false) {
+        const url = `${this.baseUrl}${endpoint}`
+        const isAuthEndpoint = this._isAuthEndpoint(endpoint)
+
+        // Proactive token refresh for non-auth endpoints
+        if (!isAuthEndpoint && typeof auth !== 'undefined' && auth.isAuthenticated()) {
+            await auth.ensureValidToken()
+        }
+
+        // Build headers - attach Bearer token for non-auth endpoints
+        const headers = {
+            'Content-Type': 'application/json',
+            ...options.headers
+        }
+
+        if (!isAuthEndpoint && typeof auth !== 'undefined') {
+            const token = auth.getAccessToken()
+            if (token) {
+                headers['Authorization'] = `Bearer ${token}`
+            }
+        }
+
         const config = {
-            headers: {
-                'Content-Type': 'application/json',
-                ...options.headers
-            },
-            ...options
-        };
+            ...options,
+            headers
+        }
 
         try {
-            const response = await fetch(url, config);
+            const response = await fetch(url, config)
+
+            // Handle 401 - attempt token refresh and retry once
+            if (response.status === 401 && !isAuthEndpoint && !_isRetry && typeof auth !== 'undefined') {
+                const refreshed = await auth.refreshTokens()
+                if (refreshed) {
+                    return this.request(endpoint, options, true)
+                }
+                // Refresh failed - redirect to login
+                auth.clearTokens()
+                if (typeof showLoginPage === 'function') {
+                    showLoginPage()
+                }
+                const error = await response.json().catch(() => ({}))
+                throw new Error(error.message || 'Session expired. Please log in again.')
+            }
+
+            // Handle 403 - show access denied, do NOT redirect
+            if (response.status === 403 && !isAuthEndpoint) {
+                const error = await response.json().catch(() => ({}))
+                if (typeof utils !== 'undefined') {
+                    utils.showToast(error.message || 'You do not have permission to perform this action', 'error')
+                }
+                throw new Error(error.message || 'Access denied')
+            }
 
             if (!response.ok) {
-                const error = await response.json().catch(() => ({}));
-                throw new Error(error.message || `HTTP error! status: ${response.status}`);
+                const error = await response.json().catch(() => ({}))
+                throw new Error(error.message || `HTTP error! status: ${response.status}`)
             }
 
             // Handle 204 No Content
             if (response.status === 204) {
-                return null;
+                return null
             }
 
-            return await response.json();
+            return await response.json()
         } catch (error) {
-            console.error('API Request failed:', error);
-            throw error;
+            console.error('API Request failed:', error)
+            throw error
         }
     }
 
@@ -125,13 +173,18 @@ class FinanceAPI {
         return this.request(`${endpoint}?${params}`);
     }
 
-    // Health check
+    // Health check - uses a simple fetch to avoid auth interceptor issues
     async checkConnection() {
         try {
-            await this.request('/api/currencies');
-            return true;
-        } catch (error) {
-            return false;
+            const headers = { 'Content-Type': 'application/json' }
+            const token = typeof auth !== 'undefined' ? auth.getAccessToken() : null
+            if (token) {
+                headers['Authorization'] = `Bearer ${token}`
+            }
+            const response = await fetch(`${this.baseUrl}/api/currencies`, { headers })
+            return response.ok || response.status === 401 || response.status === 403
+        } catch {
+            return false
         }
     }
 }

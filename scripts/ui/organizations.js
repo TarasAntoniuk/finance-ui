@@ -15,9 +15,9 @@ Object.assign(modules, {
 
         contentBody.innerHTML = `
             <div class="action-bar">
-                <button class="btn btn-primary" onclick="modules.createOrganization()">
+                ${auth.canWrite() ? `<button class="btn btn-primary" onclick="modules.createOrganization()">
                     ➕ New Organization
-                </button>
+                </button>` : ''}
             </div>
             <div class="table-container">
                 <table>
@@ -55,8 +55,10 @@ Object.assign(modules, {
                     <td>${org.country?.name || '-'}</td>
                     <td>${org.email || '-'}</td>
                     <td>
-                        <button class="btn-icon" onclick="modules.editOrganization(${org.id})" title="Edit">✏️</button>
-                        <button class="btn-icon" onclick="modules.deleteOrganization(${org.id})" title="Delete">🗑️</button>
+                        ${auth.canWrite() ? `
+                            <button class="btn-icon" onclick="modules.editOrganization(${org.id})" title="Edit">✏️</button>
+                            <button class="btn-icon" onclick="modules.deleteOrganization(${org.id})" title="Delete">🗑️</button>
+                        ` : ''}
                     </td>
                 </tr>
             `).join('');

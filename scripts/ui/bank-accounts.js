@@ -15,9 +15,9 @@ Object.assign(modules, {
 
         contentBody.innerHTML = `
             <div class="action-bar">
-                <button class="btn btn-primary" onclick="modules.createBankAccount()">
+                ${auth.canWrite() ? `<button class="btn btn-primary" onclick="modules.createBankAccount()">
                     ➕ New Bank Account
-                </button>
+                </button>` : ''}
             </div>
             <div class="table-container">
                 <table>
@@ -86,8 +86,10 @@ Object.assign(modules, {
                         <td>${account.isDefault ? '⭐' : ''}</td>
                         <td>
                             <button class="btn-icon" onclick="modules.viewBankAccount(${account.id})" title="View">👁️</button>
-                            <button class="btn-icon" onclick="modules.editBankAccount(${account.id})" title="Edit">✏️</button>
-                            <button class="btn-icon" onclick="modules.deleteBankAccount(${account.id})" title="Delete">🗑️</button>
+                            ${auth.canWrite() ? `
+                                <button class="btn-icon" onclick="modules.editBankAccount(${account.id})" title="Edit">✏️</button>
+                                <button class="btn-icon" onclick="modules.deleteBankAccount(${account.id})" title="Delete">🗑️</button>
+                            ` : ''}
                         </td>
                     </tr>
                 `;
@@ -412,7 +414,7 @@ Object.assign(modules, {
 
                     <div class="modal-footer">
                         <button class="btn btn-secondary" onclick="utils.hideModal()">Close</button>
-                        <button class="btn btn-primary" onclick="utils.hideModal(); modules.editBankAccount(${id})">Edit</button>
+                        ${auth.canWrite() ? `<button class="btn btn-primary" onclick="utils.hideModal(); modules.editBankAccount(${id})">Edit</button>` : ''}
                     </div>
                 </div>
             `;
