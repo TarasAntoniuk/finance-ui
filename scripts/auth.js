@@ -232,6 +232,37 @@ const auth = {
     },
 
     /**
+     * Login with a Google ID token obtained from Google Identity Services.
+     * New users are auto-provisioned on the backend (GUEST role).
+     * @returns {Object} {success, user, error}
+     */
+    async loginWithGoogle(idToken) {
+        try {
+            const response = await fetch(`${API_BASE_URL}/api/auth/google`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ idToken })
+            })
+
+            if (response.ok) {
+                const data = await response.json()
+                this.saveTokens(data.accessToken, data.refreshToken)
+                return { success: true, user: this.getCurrentUser() }
+            }
+
+            const errorData = await response.json().catch(() => ({}))
+
+            if (response.status === 403) {
+                return { success: false, error: 'Your account has been disabled' }
+            }
+
+            return { success: false, error: errorData.message || 'Google sign-in failed' }
+        } catch {
+            return { success: false, error: 'Network error. Please check your connection.' }
+        }
+    },
+
+    /**
      * Register a new account
      * @returns {Object} {success, user, error, validationErrors}
      */

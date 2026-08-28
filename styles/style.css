@@ -523,6 +523,31 @@ body {
     cursor: not-allowed;
 }
 
+.login-divider {
+    display: flex;
+    align-items: center;
+    text-align: center;
+    color: var(--text-secondary);
+    font-size: 0.875rem;
+    margin: var(--spacing-md) 0;
+}
+
+.login-divider::before,
+.login-divider::after {
+    content: '';
+    flex: 1;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.login-divider span {
+    padding: 0 var(--spacing-sm);
+}
+
+#google-signin-button {
+    display: flex;
+    justify-content: center;
+}
+
 .login-error {
     color: var(--danger-color);
     font-size: 0.875rem;

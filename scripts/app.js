@@ -29,16 +29,76 @@ function switchAuthTab(tab) {
     loginError.innerHTML = ''
     registerError.innerHTML = ''
 
+    const googleSection = document.getElementById('google-auth-section')
+
     if (tab === 'login') {
         loginTab.classList.add('active')
         registerTab.classList.remove('active')
         loginForm.classList.remove('hidden')
         registerForm.classList.add('hidden')
+        googleSection.classList.remove('hidden')
     } else {
         registerTab.classList.add('active')
         loginTab.classList.remove('active')
         registerForm.classList.remove('hidden')
         loginForm.classList.add('hidden')
+        googleSection.classList.add('hidden')
+    }
+}
+
+// ========================================
+// GOOGLE SIGN-IN
+// ========================================
+
+let googleSignInInitialized = false
+
+/**
+ * Called by the Google Identity Services script once it has loaded (see index.html)
+ */
+function onGoogleLibraryLoad() {
+    initGoogleSignIn()
+}
+
+/**
+ * Initialize Google Identity Services and render the "Sign in with Google" button
+ */
+function initGoogleSignIn() {
+    if (typeof google === 'undefined' || !google.accounts || !google.accounts.id) return
+
+    const buttonContainer = document.getElementById('google-signin-button')
+    if (!buttonContainer) return
+
+    if (!googleSignInInitialized) {
+        google.accounts.id.initialize({
+            client_id: GOOGLE_CLIENT_ID,
+            callback: handleGoogleCredential
+        })
+        googleSignInInitialized = true
+    }
+
+    buttonContainer.innerHTML = ''
+    google.accounts.id.renderButton(buttonContainer, {
+        theme: 'outline',
+        size: 'large',
+        type: 'standard',
+        text: 'signin_with',
+        width: 320
+    })
+}
+
+/**
+ * Handle the Google ID token returned by Google Identity Services
+ */
+async function handleGoogleCredential(response) {
+    const errorEl = document.getElementById('login-error')
+    errorEl.innerHTML = ''
+
+    const result = await auth.loginWithGoogle(response.credential)
+
+    if (result.success) {
+        showApp()
+    } else {
+        errorEl.textContent = result.error
     }
 }
 
@@ -131,6 +191,7 @@ function showLoginPage() {
     document.getElementById('login-error').innerHTML = ''
     document.getElementById('register-error').innerHTML = ''
     switchAuthTab('login')
+    initGoogleSignIn()
 }
 
 /**
