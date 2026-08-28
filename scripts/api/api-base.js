@@ -33,6 +33,10 @@ function getApiBaseUrl(environment) {
 const CURRENT_ENVIRONMENT = detectEnvironment()
 const API_BASE_URL = getApiBaseUrl(CURRENT_ENVIRONMENT)
 
+// Google sign-in client ID. The same OAuth client serves both local and production:
+// authorized JavaScript origins are configured per environment in the Google Cloud Console.
+const GOOGLE_CLIENT_ID = '849016863825-97v6tb10ppmkr1d308m0mssah1ohru65.apps.googleusercontent.com'
+
 console.log(`🔧 API Configuration: ${CURRENT_ENVIRONMENT} environment - ${API_BASE_URL}`)
 
 // API Client

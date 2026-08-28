@@ -7,6 +7,8 @@
     <link rel="stylesheet" href="styles/style.css">
     <link rel="stylesheet" href="styles/components.css">
     <link rel="stylesheet" href="styles/responsive.css">
+    <!-- Google Identity Services -->
+    <script src="https://accounts.google.com/gsi/client" async onload="onGoogleLibraryLoad()"></script>
 </head>
 <body>
 
@@ -34,6 +36,10 @@
                 <div class="login-error" id="login-error"></div>
                 <button type="submit" class="btn btn-primary login-btn" id="login-submit-btn">Login</button>
             </form>
+            <div id="google-auth-section">
+                <div class="login-divider"><span>or</span></div>
+                <div id="google-signin-button"></div>
+            </div>
             <form id="register-form" class="hidden" onsubmit="handleRegister(event)">
                 <div class="form-group">
                     <label for="register-email">Email</label>
