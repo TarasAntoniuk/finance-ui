@@ -31,6 +31,14 @@ Finance Accounting System is a comprehensive solution for managing financial ope
 ### Configuration
 - ✅ **Accounting Policies**: Configure accounting rules and policies
 
+### Security
+- ✅ **JWT Authentication**: Access tokens with transparent background renewal
+- ✅ **Google Sign-In**: One-click sign-in via Google Identity Services
+- ✅ **HttpOnly Refresh Cookie**: Refresh token never exposed to JavaScript
+- ✅ **Role-Based UI**: ADMIN, USER and GUEST see different navigation and actions
+- ✅ **Session Expiry Handling**: Expired sessions return to login with a stated reason
+- ✅ **User Administration**: Admin screen for roles and account status
+
 ## Project Structure
 
 ```
