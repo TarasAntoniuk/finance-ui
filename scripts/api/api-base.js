@@ -37,6 +37,8 @@ const API_BASE_URL = getApiBaseUrl(CURRENT_ENVIRONMENT)
 // authorized JavaScript origins are configured per environment in the Google Cloud Console.
 const GOOGLE_CLIENT_ID = '849016863825-97v6tb10ppmkr1d308m0mssah1ohru65.apps.googleusercontent.com'
 
+const SESSION_EXPIRED_MESSAGE = 'Your session has expired. Please sign in again.'
+
 console.log(`🔧 API Configuration: ${CURRENT_ENVIRONMENT} environment - ${API_BASE_URL}`)
 
 // API Client
@@ -67,13 +69,30 @@ class FinanceAPI {
         return endpoint.startsWith('/api/auth/')
     }
 
+    /**
+     * Tear down the session and send the user back to the login page.
+     * Called when the refresh token is gone or rejected by the backend.
+     */
+    _handleSessionExpired() {
+        if (typeof auth !== 'undefined') {
+            auth.clearTokens()
+        }
+        if (typeof showLoginPage === 'function') {
+            showLoginPage(SESSION_EXPIRED_MESSAGE)
+        }
+    }
+
     async request(endpoint, options = {}, _isRetry = false) {
         const url = `${this.baseUrl}${endpoint}`
         const isAuthEndpoint = this._isAuthEndpoint(endpoint)
 
         // Proactive token refresh for non-auth endpoints
         if (!isAuthEndpoint && typeof auth !== 'undefined' && auth.isAuthenticated()) {
-            await auth.ensureValidToken()
+            const tokenIsValid = await auth.ensureValidToken()
+            if (!tokenIsValid) {
+                this._handleSessionExpired()
+                throw new Error(SESSION_EXPIRED_MESSAGE)
+            }
         }
 
         // Build headers - attach Bearer token for non-auth endpoints
@@ -104,12 +123,8 @@ class FinanceAPI {
                     return this.request(endpoint, options, true)
                 }
                 // Refresh failed - redirect to login
-                auth.clearTokens()
-                if (typeof showLoginPage === 'function') {
-                    showLoginPage()
-                }
-                const error = await response.json().catch(() => ({}))
-                throw new Error(error.message || 'Session expired. Please log in again.')
+                this._handleSessionExpired()
+                throw new Error(SESSION_EXPIRED_MESSAGE)
             }
 
             // Handle 403 - show access denied, do NOT redirect
