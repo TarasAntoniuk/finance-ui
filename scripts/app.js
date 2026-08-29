@@ -179,8 +179,9 @@ async function handleLogout() {
 
 /**
  * Show the login page and hide the app
+ * @param {string} [message] - reason the user landed here, e.g. an expired session
  */
-function showLoginPage() {
+function showLoginPage(message = '') {
     document.getElementById('login-page').classList.remove('hidden')
     document.getElementById('app-container').classList.add('hidden')
     // Clear form fields
@@ -188,7 +189,7 @@ function showLoginPage() {
     document.getElementById('login-password').value = ''
     document.getElementById('register-email').value = ''
     document.getElementById('register-password').value = ''
-    document.getElementById('login-error').innerHTML = ''
+    document.getElementById('login-error').textContent = message
     document.getElementById('register-error').innerHTML = ''
     switchAuthTab('login')
     initGoogleSignIn()
@@ -270,7 +271,7 @@ async function initApp() {
     if (auth.isTokenExpired()) {
         const refreshed = await auth.refreshTokens()
         if (!refreshed) {
-            showLoginPage()
+            showLoginPage(SESSION_EXPIRED_MESSAGE)
             return
         }
     }

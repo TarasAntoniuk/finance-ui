@@ -3,6 +3,11 @@
  * JWT token management, role-based access control, login/logout flows
  */
 
+// Access token lives in localStorage; the refresh token is an HttpOnly cookie
+// set by the backend on /api/auth/refresh and never readable from JavaScript.
+const ACCESS_TOKEN_KEY = 'accessToken'
+const LEGACY_REFRESH_TOKEN_KEY = 'refreshToken'
+
 const auth = {
     // Token refresh state
     _isRefreshing: false,
@@ -28,33 +33,26 @@ const auth = {
     },
 
     /**
-     * Save tokens to localStorage
+     * Save the access token returned by an auth endpoint
      */
-    saveTokens(accessToken, refreshToken) {
-        localStorage.setItem('accessToken', accessToken)
-        localStorage.setItem('refreshToken', refreshToken)
+    saveAccessToken(accessToken) {
+        localStorage.setItem(ACCESS_TOKEN_KEY, accessToken)
+        localStorage.removeItem(LEGACY_REFRESH_TOKEN_KEY)
     },
 
     /**
      * Clear all auth data from localStorage
      */
     clearTokens() {
-        localStorage.removeItem('accessToken')
-        localStorage.removeItem('refreshToken')
+        localStorage.removeItem(ACCESS_TOKEN_KEY)
+        localStorage.removeItem(LEGACY_REFRESH_TOKEN_KEY)
     },
 
     /**
      * Get current access token
      */
     getAccessToken() {
-        return localStorage.getItem('accessToken')
-    },
-
-    /**
-     * Get current refresh token
-     */
-    getRefreshToken() {
-        return localStorage.getItem('refreshToken')
+        return localStorage.getItem(ACCESS_TOKEN_KEY)
     },
 
     /**
@@ -136,15 +134,12 @@ const auth = {
     async ensureValidToken() {
         if (!this.isTokenExpiringSoon()) return true
 
-        const refreshToken = this.getRefreshToken()
-        if (!refreshToken) return false
-
         return this.refreshTokens()
     },
 
     /**
-     * Refresh tokens using the refresh token
-     * Handles concurrent refresh requests with a queue
+     * Refresh the access token using the HttpOnly refresh token cookie.
+     * Handles concurrent refresh requests with a queue.
      * @returns {boolean} true if refresh succeeded
      */
     async refreshTokens() {
@@ -157,15 +152,9 @@ const auth = {
         this._isRefreshing = true
 
         try {
-            const refreshToken = this.getRefreshToken()
-            if (!refreshToken) {
-                this._processQueue(false)
-                return false
-            }
-
             const response = await fetch(`${API_BASE_URL}/api/auth/refresh`, {
                 method: 'POST',
-                headers: { 'X-Refresh-Token': refreshToken }
+                credentials: 'include'
             })
 
             if (!response.ok) {
@@ -175,7 +164,7 @@ const auth = {
             }
 
             const data = await response.json()
-            this.saveTokens(data.accessToken, data.refreshToken)
+            this.saveAccessToken(data.accessToken)
             this._processQueue(true)
             return true
         } catch {
@@ -203,13 +192,14 @@ const auth = {
         try {
             const response = await fetch(`${API_BASE_URL}/api/auth/login`, {
                 method: 'POST',
+                credentials: 'include',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ email, password })
             })
 
             if (response.ok) {
                 const data = await response.json()
-                this.saveTokens(data.accessToken, data.refreshToken)
+                this.saveAccessToken(data.accessToken)
                 return { success: true, user: this.getCurrentUser() }
             }
 
@@ -240,13 +230,14 @@ const auth = {
         try {
             const response = await fetch(`${API_BASE_URL}/api/auth/google`, {
                 method: 'POST',
+                credentials: 'include',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ idToken })
             })
 
             if (response.ok) {
                 const data = await response.json()
-                this.saveTokens(data.accessToken, data.refreshToken)
+                this.saveAccessToken(data.accessToken)
                 return { success: true, user: this.getCurrentUser() }
             }
 
@@ -270,13 +261,14 @@ const auth = {
         try {
             const response = await fetch(`${API_BASE_URL}/api/auth/register`, {
                 method: 'POST',
+                credentials: 'include',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ email, password })
             })
 
             if (response.status === 201) {
                 const data = await response.json()
-                this.saveTokens(data.accessToken, data.refreshToken)
+                this.saveAccessToken(data.accessToken)
                 return { success: true, user: this.getCurrentUser() }
             }
 
@@ -308,6 +300,7 @@ const auth = {
             try {
                 await fetch(`${API_BASE_URL}/api/auth/logout`, {
                     method: 'POST',
+                    credentials: 'include',
                     headers: { 'Authorization': `Bearer ${accessToken}` }
                 })
             } catch {
