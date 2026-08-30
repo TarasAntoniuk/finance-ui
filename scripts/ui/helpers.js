@@ -66,6 +66,11 @@ Object.assign(modules, {
         return translations[type] || type;
     },
 
+    /**
+     * Page switcher under a list. The callback is bound as a real listener:
+     * an inline onclick can only carry a string, and a stringified callback
+     * is re-parsed as a function expression that is never invoked.
+     */
     renderPagination(elementId, metadata, onPageChange) {
         const container = document.getElementById(elementId);
         if (!container || !metadata) return;
@@ -73,13 +78,20 @@ Object.assign(modules, {
         const { currentPage, totalPages, hasNext, hasPrevious } = metadata;
 
         container.innerHTML = `
-            <button ${!hasPrevious ? 'disabled' : ''} onclick="AppState.currentPage = ${currentPage - 1}; ${onPageChange.toString()}()">
+            <button type="button" data-page="${currentPage - 1}" ${!hasPrevious ? 'disabled' : ''}>
                 ◀ Previous
             </button>
             <span>Page ${currentPage + 1} of ${totalPages}</span>
-            <button ${!hasNext ? 'disabled' : ''} onclick="AppState.currentPage = ${currentPage + 1}; ${onPageChange.toString()}()">
+            <button type="button" data-page="${currentPage + 1}" ${!hasNext ? 'disabled' : ''}>
                 Next ▶
             </button>
         `;
+
+        container.querySelectorAll('button[data-page]').forEach(button => {
+            button.addEventListener('click', () => {
+                AppState.currentPage = Number(button.dataset.page);
+                onPageChange();
+            });
+        });
     }
 });
