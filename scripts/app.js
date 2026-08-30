@@ -4,6 +4,8 @@
  */
 
 // Application State
+const DASHBOARD_ACCOUNT_LIMIT = 8
+
 const AppState = {
     currentModule: null,
     currentPage: 0,
@@ -381,23 +383,43 @@ function showWelcomeScreen() {
         ${guestBanner}
         <div class="welcome-screen">
             <h2>Welcome to Finance Accounting System</h2>
-            <p>Select a module from the left menu to get started</p>
-            <div class="quick-stats" id="quick-stats">
+            <p>Balances as of ${utils.formatDate(todayIsoDate())}</p>
+
+            <div class="quick-stats" id="balance-totals">
                 <div class="stat-card">
-                    <h4>Bank Accounts</h4>
-                    <p class="stat-value" id="accounts-count">-</p>
+                    <h4>Loading balances</h4>
+                    <p class="stat-value">…</p>
                 </div>
-                <div class="stat-card">
-                    <h4>Counterparties</h4>
-                    <p class="stat-value" id="counterparties-count">-</p>
-                </div>
-                <div class="stat-card">
-                    <h4>Organizations</h4>
-                    <p class="stat-value" id="organizations-count">-</p>
+            </div>
+
+            <div id="balance-accounts"></div>
+
+            <div class="report-summary">
+                <h4>Directories</h4>
+                <div class="quick-stats" id="quick-stats">
+                    <div class="stat-card">
+                        <h4>Bank Accounts</h4>
+                        <p class="stat-value" id="accounts-count">-</p>
+                    </div>
+                    <div class="stat-card">
+                        <h4>Counterparties</h4>
+                        <p class="stat-value" id="counterparties-count">-</p>
+                    </div>
+                    <div class="stat-card">
+                        <h4>Organizations</h4>
+                        <p class="stat-value" id="organizations-count">-</p>
+                    </div>
                 </div>
             </div>
         </div>
     `
+}
+
+/**
+ * Today's date as an ISO day string, the format the reports API expects
+ */
+function todayIsoDate() {
+    return new Date().toISOString().split('T')[0]
 }
 
 /**
@@ -508,9 +530,116 @@ function expandActiveModuleGroup() {
 }
 
 /**
- * Load quick stats for the welcome screen
+ * Load the welcome screen: current bank balances first, directory counts second.
+ * The two halves fail independently so one broken call cannot blank the page.
  */
 async function loadQuickStats() {
+    await Promise.allSettled([loadBalanceOverview(), loadDirectoryCounts()])
+}
+
+/**
+ * Render current balances by currency plus the accounts behind them.
+ * Scoped to the organization the user is attached to — an admin is otherwise
+ * unrestricted server-side and would see every organization on the dashboard.
+ */
+async function loadBalanceOverview() {
+    const totalsEl = document.getElementById('balance-totals')
+    const accountsEl = document.getElementById('balance-accounts')
+    if (!totalsEl) return
+
+    try {
+        const report = await api.getAccountBalances(todayIsoDate(), auth.getOrganizationId())
+        const totals = Object.entries(report.grandTotalByCurrency || {})
+
+        if (totals.length === 0) {
+            totalsEl.innerHTML = `
+                <div class="stat-card">
+                    <h4>No balances yet</h4>
+                    <p class="stat-value">—</p>
+                </div>
+            `
+            if (accountsEl) accountsEl.innerHTML = ''
+            return
+        }
+
+        totalsEl.innerHTML = totals.map(([currency, total]) => `
+            <div class="stat-card">
+                <h4>${currency}</h4>
+                <p class="stat-value">${utils.formatNumber(total, 2)}</p>
+            </div>
+        `).join('')
+
+        renderBalanceAccounts(accountsEl, report.accounts || [])
+    } catch (error) {
+        console.error('Failed to load balances:', error)
+        totalsEl.innerHTML = `
+            <div class="stat-card">
+                <h4>Balances unavailable</h4>
+                <p class="stat-value">—</p>
+            </div>
+        `
+        if (accountsEl) accountsEl.innerHTML = ''
+    }
+}
+
+/**
+ * Accounts table under the currency totals, largest balances first
+ */
+function renderBalanceAccounts(container, accounts) {
+    if (!container || accounts.length === 0) return
+
+    const rows = [...accounts]
+        .sort((a, b) => Math.abs(b.balance) - Math.abs(a.balance))
+        .slice(0, DASHBOARD_ACCOUNT_LIMIT)
+
+    container.innerHTML = `
+        <div class="report-summary">
+            <h4>Accounts</h4>
+            <div class="table-container">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Account Number</th>
+                            <th>Bank</th>
+                            <th>Currency</th>
+                            <th class="text-right">Balance</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        ${rows.map(acc => `
+                            <tr>
+                                <td>${acc.accountNumber}</td>
+                                <td>${acc.bankName}</td>
+                                <td>${acc.currencyCode}</td>
+                                <td class="text-right"><strong>${utils.formatCurrency(acc.balance, acc.currencySymbol)}</strong></td>
+                            </tr>
+                        `).join('')}
+                    </tbody>
+                </table>
+            </div>
+            ${accounts.length > DASHBOARD_ACCOUNT_LIMIT
+                ? `<p>Showing ${DASHBOARD_ACCOUNT_LIMIT} of ${accounts.length} accounts — open Reports for the full list.</p>`
+                : ''}
+        </div>
+    `
+}
+
+/**
+ * Accounts held by the organization the user is attached to.
+ * Without an organization there is nothing to scope to, so the list is returned as is.
+ */
+function ownOrganizationAccounts(accounts) {
+    const organizationId = auth.getOrganizationId()
+    if (!organizationId) return accounts
+
+    return accounts.filter(account =>
+        account.holderType === 'ORGANIZATION' && Number(account.holderId) === Number(organizationId))
+}
+
+/**
+ * Directory counts shown beneath the balances
+ */
+async function loadDirectoryCounts() {
     try {
         const [accounts, counterparties, organizations] = await Promise.all([
             api.getBankAccounts(),
@@ -522,11 +651,11 @@ async function loadQuickStats() {
         const counterpartiesEl = document.getElementById('counterparties-count')
         const organizationsEl = document.getElementById('organizations-count')
 
-        if (accountsEl) accountsEl.textContent = accounts.length
+        if (accountsEl) accountsEl.textContent = ownOrganizationAccounts(accounts).length
         if (counterpartiesEl) counterpartiesEl.textContent = counterparties.metadata?.totalElements || 0
         if (organizationsEl) organizationsEl.textContent = organizations.length
     } catch (error) {
-        console.error('Failed to load stats:', error)
+        console.error('Failed to load directory counts:', error)
     }
 }
 
