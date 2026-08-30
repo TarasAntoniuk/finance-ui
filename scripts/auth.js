@@ -57,7 +57,7 @@ const auth = {
 
     /**
      * Get current user info from decoded access token
-     * @returns {Object|null} {id, email, role} or null
+     * @returns {Object|null} {id, email, role, organizationId} or null
      */
     getCurrentUser() {
         const token = this.getAccessToken()
@@ -67,8 +67,18 @@ const auth = {
         return {
             id: payload.sub,
             email: payload.email,
-            role: payload.role
+            role: payload.role,
+            organizationId: payload.orgId ?? null
         }
+    },
+
+    /**
+     * Organization the current user is attached to
+     * @returns {number|null} organization id, or null when the user has none
+     */
+    getOrganizationId() {
+        const user = this.getCurrentUser()
+        return user ? user.organizationId : null
     },
 
     /**

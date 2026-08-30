@@ -538,7 +538,9 @@ async function loadQuickStats() {
 }
 
 /**
- * Render current balances by currency plus the accounts behind them
+ * Render current balances by currency plus the accounts behind them.
+ * Scoped to the organization the user is attached to — an admin is otherwise
+ * unrestricted server-side and would see every organization on the dashboard.
  */
 async function loadBalanceOverview() {
     const totalsEl = document.getElementById('balance-totals')
@@ -546,7 +548,7 @@ async function loadBalanceOverview() {
     if (!totalsEl) return
 
     try {
-        const report = await api.getAccountBalances(todayIsoDate())
+        const report = await api.getAccountBalances(todayIsoDate(), auth.getOrganizationId())
         const totals = Object.entries(report.grandTotalByCurrency || {})
 
         if (totals.length === 0) {
@@ -623,6 +625,18 @@ function renderBalanceAccounts(container, accounts) {
 }
 
 /**
+ * Accounts held by the organization the user is attached to.
+ * Without an organization there is nothing to scope to, so the list is returned as is.
+ */
+function ownOrganizationAccounts(accounts) {
+    const organizationId = auth.getOrganizationId()
+    if (!organizationId) return accounts
+
+    return accounts.filter(account =>
+        account.holderType === 'ORGANIZATION' && Number(account.holderId) === Number(organizationId))
+}
+
+/**
  * Directory counts shown beneath the balances
  */
 async function loadDirectoryCounts() {
@@ -637,7 +651,7 @@ async function loadDirectoryCounts() {
         const counterpartiesEl = document.getElementById('counterparties-count')
         const organizationsEl = document.getElementById('organizations-count')
 
-        if (accountsEl) accountsEl.textContent = accounts.length
+        if (accountsEl) accountsEl.textContent = ownOrganizationAccounts(accounts).length
         if (counterpartiesEl) counterpartiesEl.textContent = counterparties.metadata?.totalElements || 0
         if (organizationsEl) organizationsEl.textContent = organizations.length
     } catch (error) {
